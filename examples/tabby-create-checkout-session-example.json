@@ -1,0 +1,123 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "https://api.tabby.ai/api/v2/checkout",
+    "headers": {
+      "Authorization": "Bearer <your-tabby-secret-key>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "payment": {
+        "amount": "100.50",
+        "currency": "AED",
+        "description": "Electronics purchase",
+        "buyer": {
+          "name": "John Doe",
+          "email": "john@example.com",
+          "phone": "971500000001",
+          "dob": "1990-05-15"
+        },
+        "shipping_address": {
+          "city": "Dubai",
+          "address": "123 Main Street, Apt 45",
+          "zip": "12345"
+        },
+        "order": {
+          "reference_id": "ORDER-2024-001",
+          "items": [
+            {
+              "reference_id": "SKU-123",
+              "title": "Wireless Headphones",
+              "description": "Premium noise-canceling headphones",
+              "quantity": 1,
+              "unit_price": "99.50",
+              "category": "Electronics",
+              "brand": "TechBrand"
+            }
+          ],
+          "tax_amount": "1.00",
+          "shipping_amount": "0.00",
+          "discount_amount": "0.00"
+        },
+        "buyer_history": {
+          "registered_since": "2023-01-15T10:00:00Z",
+          "loyalty_level": 5,
+          "wishlist_count": 3,
+          "is_phone_number_verified": true,
+          "is_email_verified": true
+        },
+        "order_history": [
+          {
+            "purchased_at": "2024-01-10T14:30:00Z",
+            "amount": "250.00",
+            "payment_method": "card",
+            "status": "complete",
+            "buyer": {
+              "name": "John Doe",
+              "email": "john@example.com",
+              "phone": "971500000001"
+            },
+            "shipping_address": {
+              "city": "Dubai",
+              "address": "123 Main Street, Apt 45",
+              "zip": "12345"
+            },
+            "items": [
+              {
+                "title": "Smart Watch",
+                "quantity": 1,
+                "unit_price": "250.00",
+                "category": "Electronics"
+              }
+            ]
+          }
+        ]
+      },
+      "lang": "en",
+      "merchant_code": "MERCHANT_CODE_123",
+      "merchant_urls": {
+        "success": "https://example.com/success",
+        "cancel": "https://example.com/cancel",
+        "failure": "https://example.com/failure"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "id": "5a8a1f00-4d3e-4a5e-9e0e-2b4c5d6e7f80",
+      "status": "created",
+      "payment": {
+        "id": "6b9b2f11-5e4f-5b6f-aa1f-3c5d6e7f8091",
+        "created_at": "2026-05-24T10:15:30Z",
+        "status": "CREATED",
+        "is_test": false,
+        "amount": "100.50",
+        "currency": "AED",
+        "description": "Electronics purchase"
+      },
+      "configuration": {
+        "available_products": {
+          "installments": [
+            {
+              "web_url": "https://checkout.tabby.ai/?sessionId=5a8a1f00-4d3e-4a5e-9e0e-2b4c5d6e7f80",
+              "qr_code": "https://checkout.tabby.ai/qr/5a8a1f00-4d3e-4a5e-9e0e-2b4c5d6e7f80"
+            }
+          ]
+        },
+        "products": {
+          "installments": {
+            "type": "installments",
+            "is_available": true,
+            "rejection_reason": null
+          }
+        }
+      },
+      "merchant_urls": {
+        "success": "https://example.com/success",
+        "cancel": "https://example.com/cancel",
+        "failure": "https://example.com/failure"
+      }
+    }
+  }
+}

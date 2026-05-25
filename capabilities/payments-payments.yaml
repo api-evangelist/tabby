@@ -1,0 +1,213 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Tabby Payments API — Payments
+  description: 'Tabby Payments API — Payments. 3 operations covering retrieve, update, list, and close.
+    Lead operation: Tabby Retrieve A Payment.'
+  tags:
+  - Tabby
+  - BNPL
+  - Payments
+  created: '2026-05-24'
+  modified: '2026-05-24'
+binds:
+- namespace: env
+  keys:
+    TABBY_SECRET_KEY: TABBY_SECRET_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: payments-payments
+    baseUri: https://api.tabby.ai
+    description: Tabby Payments API — Payments consume block. Retrieve, list, update, and close BNPL payments.
+    resources:
+    - name: payments
+      path: /api/v2/payments
+      operations:
+      - name: listpayments
+        method: GET
+        description: Tabby List Of All Payments — returns sorted success payments with optional filters.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: limit
+          in: query
+          type: integer
+          description: Max payments per page.
+          required: false
+        - name: offset
+          in: query
+          type: integer
+          description: Pagination offset.
+          required: false
+    - name: payment-by-id
+      path: /api/v2/payments/{id}
+      operations:
+      - name: getpayment
+        method: GET
+        description: Tabby Retrieve A Payment by id.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: id
+          in: path
+          type: string
+          description: Payment UUID.
+          required: true
+      - name: updatepayment
+        method: PUT
+        description: Tabby Update A Payment — updates merchant reference_id field only.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: id
+          in: path
+          type: string
+          description: Payment UUID.
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Update payload — reference_id only.
+          required: true
+    - name: payment-close
+      path: /api/v2/payments/{id}/close
+      operations:
+      - name: closepayment
+        method: POST
+        description: Tabby Close A Payment — finalize and stop fulfilment.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: id
+          in: path
+          type: string
+          description: Payment UUID.
+          required: true
+    authentication:
+      type: bearer
+      value: '{{env.TABBY_SECRET_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: payments-payments-rest
+    port: 8080
+    description: REST adapter for Tabby Payments — Payments.
+    resources:
+    - path: /v1/payments
+      name: payments
+      description: REST surface for listing Tabby payments.
+      operations:
+      - method: GET
+        name: listpayments
+        description: List Tabby payments.
+        call: payments-payments.listpayments
+        with:
+          limit: rest.query.limit
+          offset: rest.query.offset
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/payments/{id}
+      name: payment-by-id
+      description: REST surface for an individual payment.
+      operations:
+      - method: GET
+        name: getpayment
+        description: Retrieve a Tabby payment.
+        call: payments-payments.getpayment
+        with:
+          id: rest.path.id
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatepayment
+        description: Update a Tabby payment reference_id.
+        call: payments-payments.updatepayment
+        with:
+          id: rest.path.id
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/payments/{id}/close
+      name: payment-close
+      description: REST surface for closing a payment.
+      operations:
+      - method: POST
+        name: closepayment
+        description: Close a Tabby payment.
+        call: payments-payments.closepayment
+        with:
+          id: rest.path.id
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: payments-payments-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Tabby Payments — Payments.
+    tools:
+    - name: tabby-list-payments
+      description: List Tabby BNPL payments.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: payments-payments.listpayments
+      with:
+        limit: tools.limit
+        offset: tools.offset
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: tabby-get-payment
+      description: Retrieve a Tabby payment by id.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: payments-payments.getpayment
+      with:
+        id: tools.id
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: tabby-update-payment
+      description: Update a Tabby payment's reference_id.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: payments-payments.updatepayment
+      with:
+        id: tools.id
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: tabby-close-payment
+      description: Close a Tabby payment.
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: payments-payments.closepayment
+      with:
+        id: tools.id
+      outputParameters:
+      - type: object
+        mapping: $.

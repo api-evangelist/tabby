@@ -1,0 +1,31 @@
+{
+  "description": "Sample webhook delivery POSTed by Tabby to a merchant endpoint after a payment is authorized.",
+  "delivery": {
+    "method": "POST",
+    "url": "https://merchant.example.com/tabby/webhook",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Tabby-Signature": "a-random-shared-secret-used-to-sign-requests"
+    },
+    "body": {
+      "id": "6b9b2f11-5e4f-5b6f-aa1f-3c5d6e7f8091",
+      "status": "authorized",
+      "created_at": "2026-05-24T10:20:00Z",
+      "amount": "100.50",
+      "currency": "AED",
+      "order": {
+        "reference_id": "ORDER-2024-001"
+      },
+      "captures": [],
+      "refunds": [],
+      "meta": {
+        "order_id": "ORDER-2024-001"
+      },
+      "token": "tok_5a8a1f004d3e4a5e9e0e2b4c5d6e7f80"
+    }
+  },
+  "expectedResponse": {
+    "status": 200,
+    "note": "Acknowledge with 200 immediately. Non-200 (or no response within 60 seconds) triggers up to 4 exponential-backoff retries spaced 1-4 minutes apart."
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/tabby/main/json-schema/tabby-checkout-session-schema.json",
+  "title": "TabbyCheckoutSession",
+  "description": "Tabby checkout session returned by POST /api/v2/checkout. Wraps the pre-scoring result, payment object, available products, and merchant redirect URLs.",
+  "type": "object",
+  "required": ["id", "status", "payment", "configuration"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Checkout session identifier."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["created", "approved", "rejected", "expired"],
+      "description": "Pre-scoring result for the session."
+    },
+    "token": {
+      "type": ["string", "null"],
+      "description": "Session token issued when status is approved."
+    },
+    "payment": {
+      "type": "object",
+      "description": "Embedded payment object created with the session.",
+      "required": ["id", "amount", "currency", "status"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "status": {
+          "type": "string",
+          "enum": ["CREATED", "AUTHORIZED", "CLOSED", "REJECTED", "EXPIRED"]
+        },
+        "is_test": { "type": "boolean" },
+        "amount": { "type": "string", "description": "Decimal-encoded amount (2 decimals AED/SAR, 3 for KWD)." },
+        "currency": { "type": "string", "enum": ["AED", "SAR", "KWD"] },
+        "description": { "type": "string" }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "description": "Available BNPL products and rejection reasons for the session.",
+      "properties": {
+        "available_products": {
+          "type": "object",
+          "properties": {
+            "installments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "web_url": { "type": "string", "format": "uri" },
+                  "qr_code": { "type": "string", "format": "uri" }
+                }
+              }
+            }
+          }
+        },
+        "products": {
+          "type": "object",
+          "properties": {
+            "installments": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "const": "installments" },
+                "is_available": { "type": "boolean" },
+                "rejection_reason": {
+                  "type": ["string", "null"],
+                  "enum": ["order_amount_too_high", "order_amount_too_low", "not_available", null]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "merchant_urls": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "string", "format": "uri" },
+        "cancel": { "type": "string", "format": "uri" },
+        "failure": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

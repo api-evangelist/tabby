@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "https://api.tabby.ai/api/v1/webhooks",
+    "headers": {
+      "Authorization": "Bearer <your-tabby-secret-key>",
+      "X-Merchant-Code": "MERCHANT_CODE_123",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "url": "https://merchant.example.com/tabby/webhook",
+      "header": {
+        "title": "X-Tabby-Signature",
+        "value": "a-random-shared-secret-used-to-sign-requests"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "id": "11111111-2222-3333-4444-555555555555",
+      "url": "https://merchant.example.com/tabby/webhook",
+      "header": {
+        "title": "X-Tabby-Signature",
+        "value": "a-random-shared-secret-used-to-sign-requests"
+      },
+      "is_test": true
+    }
+  }
+}

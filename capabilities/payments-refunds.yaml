@@ -1,0 +1,87 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Tabby Payments API — Refunds
+  description: Tabby Payments API — Refunds. Refund a closed Tabby BNPL payment fully or partially.
+  tags:
+  - Tabby
+  - BNPL
+  - Payments
+  - Refunds
+  created: '2026-05-24'
+  modified: '2026-05-24'
+binds:
+- namespace: env
+  keys:
+    TABBY_SECRET_KEY: TABBY_SECRET_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: payments-refunds
+    baseUri: https://api.tabby.ai
+    description: Tabby Payments API — Refunds consume block.
+    resources:
+    - name: refunds
+      path: /api/v2/payments/{id}/refunds
+      operations:
+      - name: refundpayment
+        method: POST
+        description: Tabby Refund A Payment — full or partial refund requests with optional line items.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: id
+          in: path
+          type: string
+          description: Payment UUID.
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Refund payload — amount, reference_id (idempotency), optional reason and items.
+          required: true
+    authentication:
+      type: bearer
+      value: '{{env.TABBY_SECRET_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: payments-refunds-rest
+    port: 8080
+    description: REST adapter for Tabby Payments — Refunds.
+    resources:
+    - path: /v1/payments/{id}/refunds
+      name: refunds
+      description: REST surface for refunds.
+      operations:
+      - method: POST
+        name: refundpayment
+        description: Refund a Tabby payment.
+        call: payments-refunds.refundpayment
+        with:
+          id: rest.path.id
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: payments-refunds-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Tabby Payments — Refunds.
+    tools:
+    - name: tabby-refund-payment
+      description: Refund a Tabby BNPL payment (full or partial).
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: payments-refunds.refundpayment
+      with:
+        id: tools.id
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

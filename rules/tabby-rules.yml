@@ -1,0 +1,108 @@
+extends:
+  - spectral:oas
+formats:
+  - oas3
+rules:
+  tabby-info-title-present:
+    description: Tabby OpenAPI specs MUST declare an info.title that begins with "Tabby".
+    message: '{{property}} must start with "Tabby" (got {{value}}).'
+    severity: error
+    given: $.info.title
+    then:
+      function: pattern
+      functionOptions:
+        match: "^Tabby"
+
+  tabby-server-host-allowlist:
+    description: Tabby production hosts are api.tabby.ai (UAE/Kuwait) and api.tabby.sa (KSA) only.
+    message: 'Server URL {{value}} must be https://api.tabby.ai/ or https://api.tabby.sa/.'
+    severity: error
+    given: $.servers[*].url
+    then:
+      function: pattern
+      functionOptions:
+        match: "^https://(api\\.tabby\\.(ai|sa))/?$"
+
+  tabby-paths-versioned:
+    description: All Tabby endpoints MUST be versioned (/api/v1 or /api/v2).
+    message: 'Path {{property}} must begin with /api/v1 or /api/v2.'
+    severity: error
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^/api/v[12]/"
+
+  tabby-operation-id-camel-case:
+    description: Tabby operationIds follow camelCase convention (e.g. postCheckoutSession).
+    message: 'operationId {{value}} must be camelCase.'
+    severity: warn
+    given: $.paths[*][*].operationId
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z][a-zA-Z0-9]+$"
+
+  tabby-operation-summary-title-case:
+    description: Operation summaries MUST use Title Case.
+    message: 'Summary "{{value}}" should use Title Case for major words.'
+    severity: warn
+    given: $.paths[*][*].summary
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[A-Z]"
+
+  tabby-bearer-auth-required:
+    description: Tabby endpoints MUST be secured with bearer authentication (secret_key scope).
+    message: 'Operation {{path}} must reference the bearerAuth security scheme.'
+    severity: error
+    given: $.paths[*][*].security[*]
+    then:
+      function: truthy
+      field: bearerAuth
+
+  tabby-currency-enum:
+    description: Tabby currency fields MUST be limited to AED, SAR, or KWD.
+    message: 'currency enum {{value}} must equal ["AED","SAR","KWD"].'
+    severity: error
+    given: $.components.schemas..properties.currency.enum
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          items:
+            enum: ["AED", "SAR", "KWD"]
+
+  tabby-language-enum:
+    description: Tabby lang fields MUST be limited to ar or en.
+    message: 'lang enum {{value}} must equal ["ar","en"].'
+    severity: error
+    given: $.components.schemas..properties.lang.enum
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          items:
+            enum: ["ar", "en"]
+
+  tabby-amount-string-type:
+    description: Tabby monetary amounts are transferred as decimal-encoded strings, not numbers.
+    message: 'amount property must be type string.'
+    severity: error
+    given: $.components.schemas..properties.amount.type
+    then:
+      function: enumeration
+      functionOptions:
+        values:
+          - string
+
+  tabby-reference-id-required-on-mutations:
+    description: Capture, refund, and similar mutating operations MUST require a reference_id (idempotency).
+    message: 'reference_id is missing from required fields on a mutating request body.'
+    severity: warn
+    given: $.paths[*][post].requestBody.content.[application/json].schema.required
+    then:
+      function: truthy

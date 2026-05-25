@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/tabby/main/json-schema/tabby-payment-schema.json",
+  "title": "TabbyPayment",
+  "description": "Tabby BNPL payment object returned by GET /api/v2/payments/{id}.",
+  "type": "object",
+  "required": ["id", "amount", "currency", "status", "buyer", "shipping_address", "order"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "status": {
+      "type": "string",
+      "enum": ["CREATED", "AUTHORIZED", "CLOSED", "REJECTED", "EXPIRED"]
+    },
+    "amount": { "type": "string" },
+    "currency": { "type": "string", "enum": ["AED", "SAR", "KWD"] },
+    "description": { "type": "string" },
+    "is_test": { "type": "boolean" },
+    "buyer": {
+      "type": "object",
+      "required": ["name", "email", "phone"],
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": {
+          "type": "string",
+          "description": "Mobile number — formats 500000001, 0500000001, +971500000001."
+        },
+        "dob": { "type": "string", "format": "date" }
+      }
+    },
+    "shipping_address": {
+      "type": "object",
+      "required": ["city", "address", "zip"],
+      "properties": {
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "zip": { "type": "string" }
+      }
+    },
+    "order": {
+      "type": "object",
+      "required": ["reference_id", "items"],
+      "properties": {
+        "reference_id": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "tabby-order-item-schema.json" }
+        },
+        "tax_amount": { "type": "string", "default": "0.00" },
+        "shipping_amount": { "type": "string", "default": "0.00" },
+        "discount_amount": { "type": "string", "default": "0.00" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "captures": {
+      "type": "array",
+      "description": "Read-only capture history.",
+      "items": { "$ref": "tabby-capture-schema.json" }
+    },
+    "refunds": {
+      "type": "array",
+      "description": "Read-only refund history.",
+      "items": { "$ref": "tabby-refund-schema.json" }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "order_id": { "type": "string" },
+        "customer": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "https://api.tabby.ai/api/v2/payments/6b9b2f11-5e4f-5b6f-aa1f-3c5d6e7f8091/refunds",
+    "headers": {
+      "Authorization": "Bearer <your-tabby-secret-key>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "amount": "99.50",
+      "reference_id": "REFUND-ORDER-2024-001-A",
+      "reason": "customer_return",
+      "items": [
+        {
+          "reference_id": "SKU-123",
+          "title": "Wireless Headphones",
+          "quantity": 1,
+          "unit_price": "99.50",
+          "category": "Electronics"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "id": "6b9b2f11-5e4f-5b6f-aa1f-3c5d6e7f8091",
+      "status": "CLOSED",
+      "amount": "100.50",
+      "currency": "AED",
+      "refunds": [
+        {
+          "id": "9d2e5133-7060-8d9f-cc30-5e7f8091a2b3",
+          "created_at": "2026-05-25T09:00:00Z",
+          "amount": "99.50",
+          "reason": "customer_return",
+          "reference_id": "REFUND-ORDER-2024-001-A"
+        }
+      ]
+    }
+  }
+}

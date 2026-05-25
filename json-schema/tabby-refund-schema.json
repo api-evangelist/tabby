@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/tabby/main/json-schema/tabby-refund-schema.json",
+  "title": "TabbyRefund",
+  "description": "Tabby refund entry created by POST /api/v2/payments/{id}/refunds.",
+  "type": "object",
+  "required": ["amount", "reference_id"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "amount": { "type": "string" },
+    "reference_id": {
+      "type": "string",
+      "description": "Idempotency key for the refund request."
+    },
+    "reason": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "tabby-order-item-schema.json" }
+    }
+  }
+}

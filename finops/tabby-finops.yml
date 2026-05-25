@@ -1,0 +1,117 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+schema: https://www.finops.org/framework/
+provider: Tabby
+providerId: tabby
+created: '2026-05-24'
+modified: '2026-05-24'
+reconciled: false
+tags:
+  - FinOps
+  - Cost Management
+  - FOCUS
+  - BNPL
+  - Payments
+description: FOCUS-aligned FinOps view of Tabby for merchants. Tabby is a revenue-share / cost-of-acceptance
+  service rather than infrastructure — cost = MDR percentage of GMV + fixed per-transaction fee, net-settled
+  to the merchant bank account.
+sources:
+  - https://tabby.ai/en-AE/help-business/about-tabby/pricing
+  - https://docs.tabby.ai
+alignedWith:
+  framework: FinOps Foundation Framework
+  frameworkUrl: https://www.finops.org/framework/
+  dataSpec: FOCUS
+  dataSpecVersion: '1.3'
+  dataSpecUrl: https://focus.finops.org/focus-specification/v1-3/
+publisherName: Tabby
+serviceCategory: Financial Services
+billingModel:
+  pricingCategory: Usage-Based
+  billingFrequency: Per Settlement
+  billingCurrency: AED, SAR, KWD
+  chargeCategories:
+    - Usage
+    - Fee
+    - Refund
+    - Adjustment
+    - Tax
+  primaryUnit: transaction
+  secondaryUnits:
+    - percent_of_gmv
+focusColumns:
+  ServiceName: Tabby BNPL
+  ServiceCategory: Financial Services
+  ProviderName: Tabby
+  PublisherName: Tabby
+  InvoiceIssuerName: Tabby
+  PricingCategory: Usage-Based
+  PricingUnit: transaction
+  BillingCurrency: Local (AED|SAR|KWD)
+meters:
+  - name: gross_merchandise_volume
+    unit: currency
+    aggregation: sum
+    dimensions:
+      - merchant_code
+      - product (pay_in_4 | pay_monthly)
+      - currency
+      - country
+  - name: transactions
+    unit: transaction
+    aggregation: count
+    dimensions:
+      - merchant_code
+      - status (authorized | captured | closed | refunded)
+      - currency
+  - name: captured_amount
+    unit: currency
+    aggregation: sum
+    dimensions:
+      - merchant_code
+      - currency
+  - name: refunded_amount
+    unit: currency
+    aggregation: sum
+    dimensions:
+      - merchant_code
+      - currency
+  - name: mdr_fee
+    unit: currency
+    aggregation: sum
+    dimensions:
+      - merchant_code
+      - currency
+    description: Merchant Discount Rate fee — variable percent of captured amount.
+  - name: fixed_fee
+    unit: currency
+    aggregation: sum
+    dimensions:
+      - merchant_code
+      - currency
+    description: Fixed per-transaction fee.
+  - name: disputes_amount
+    unit: currency
+    aggregation: sum
+    dimensions:
+      - merchant_code
+      - status
+      - currency
+practices:
+  inform:
+    - 'Reconcile capture and refund webhooks against the merchant dashboard daily.'
+    - 'Allocate Tabby fees to the originating product / business unit via the order_history.merchant_reference.'
+  optimize:
+    - 'Negotiate MDR with Tabby annually based on volume and category.'
+    - 'Use approved messaging and placement best practices to increase BNPL conversion lift and amortise MDR.'
+    - 'Encourage Pay-in-4 where AOV is low; reserve Pay Monthly for higher AOV to improve unit economics.'
+  operate:
+    - 'Wire webhooks to settlement reconciliation; auto-close fulfilled orders to release authorization holds.'
+    - 'Batch-approve clear disputes via /api/v1/disputes/approve to clear backlogs (max 20 per call).'
+costAllocationDimensions:
+  - merchant_code
+  - currency
+  - country
+  - product
+  - order_id
+  - reference_id

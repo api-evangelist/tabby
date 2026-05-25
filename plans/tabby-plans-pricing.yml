@@ -1,0 +1,120 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Tabby
+providerId: tabby
+created: '2026-05-24'
+modified: '2026-05-24'
+reconciled: true
+tags:
+  - BNPL
+  - Payments
+  - MENA
+description: 'Tabby merchant commercial model. Tabby earns primarily via a merchant discount rate (MDR) charged
+  on each successful BNPL transaction, plus a fixed fee per order. End-buyers pay zero interest on Pay-in-4
+  and zero late fees in KSA (Shariah compliant). Specific MDR and fixed-fee values are negotiated per
+  merchant in the signed contract. Industry observed range: ~3-8% MDR depending on vertical and volume.'
+sources:
+  - https://tabby.ai/en-AE/help-business/about-tabby/pricing
+  - https://tabby.ai/en-AE/business
+  - https://tabby.ai/en-AE/newsroom/no-late-fees
+plans:
+  - id: tabby-merchant
+    name: Merchant (Custom Contract)
+    type: usage-based
+    description: Tabby's standard merchant plan. All merchants operate under a custom contract — there is
+      no public self-serve tier. Pricing is a per-transaction MDR plus a fixed fee per successful order.
+    entries:
+      - label: Merchant Discount Rate (MDR)
+        name: mdr
+        type: metered
+        metric: percent_of_transaction
+        limit: -1
+        timeFrame: usage
+        geo: MENA
+        unit: 1
+        price: 'Custom'
+        userMultiplied: false
+        description: 'Variable commission applied per transaction. Typically 3-8% depending on industry,
+          volume, and merchant profile. Specified in your Tabby contract.'
+      - label: Fixed per-transaction fee
+        name: fixed_fee
+        type: metered
+        metric: per_transaction
+        limit: -1
+        timeFrame: usage
+        geo: MENA
+        unit: 1
+        price: 'Custom'
+        userMultiplied: false
+        description: A fixed fee per successful order, specified in the merchant contract.
+    elements:
+      - name: Pay-in-4 (4 interest-free biweekly installments)
+      - name: Pay Monthly (3 / 6 / 9 / 12 month installments)
+      - name: Hosted checkout with web_url and QR
+      - name: Real-time pre-scoring at session creation
+      - name: Full / partial captures and refunds
+      - name: Webhooks for the full payment lifecycle
+      - name: Disputes API with evidence upload (PNG/JPEG/PDF, 5MB max)
+      - name: Free merchant integration support
+      - name: Certified plugins for Magento 2, Shopify, WooCommerce, Salla, Zid, OpenCart, ExpandCart,
+          Matjrah, Salesforce, Odoo
+      - name: iOS, Android, Flutter, and React Native SDKs
+      - name: POS, custom payment links, and on-site messaging
+      - name: Marketing toolkit, brand assets, and approved messaging
+      - name: Co-marketing through Tabby Shop discovery app
+  - id: tabby-buyer-pay-in-4
+    name: Buyer — Pay in 4
+    type: free
+    description: Consumer-facing Pay-in-4 product. Always interest-free for the buyer. Tabby removed all
+      late fees in KSA in 2023 (Shariah compliant).
+    entries:
+      - label: Interest
+        name: interest
+        type: fixed
+        metric: per_purchase
+        limit: -1
+        timeFrame: usage
+        geo: MENA
+        unit: 1
+        price: '0'
+        userMultiplied: false
+      - label: Late fee (KSA)
+        name: late_fee_ksa
+        type: fixed
+        metric: per_purchase
+        limit: -1
+        timeFrame: usage
+        geo: KSA
+        unit: 1
+        price: '0'
+        userMultiplied: false
+    elements:
+      - name: 4 equal payments over 6 weeks
+      - name: First payment due at checkout
+      - name: Pay via Tabby Card, app, or bank transfer
+      - name: Zero interest, ever
+      - name: Zero late fees in KSA
+  - id: tabby-buyer-pay-monthly
+    name: Buyer — Pay Monthly
+    type: usage-based
+    description: 3-12 month installment product for larger purchases. May include a service fee on longer
+      tenures depending on market and merchant configuration.
+    entries:
+      - label: Monthly service fee
+        name: monthly_service_fee
+        type: metered
+        metric: percent_of_balance
+        limit: -1
+        timeFrame: month
+        geo: MENA
+        unit: 1
+        price: 'Variable'
+        userMultiplied: false
+        description: May apply on 6+ month plans; disclosed transparently at checkout. Not charged in
+          Shariah-compliant markets where service is offered as Murabaha or similar.
+    elements:
+      - name: 3, 6, 9, or 12 month tenures
+      - name: Equal monthly installments
+      - name: Transparent disclosure at checkout
+      - name: Pay early without penalty

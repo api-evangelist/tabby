@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/tabby/main/json-schema/tabby-webhook-event-schema.json",
+  "title": "TabbyWebhookEvent",
+  "description": "JSON payload POSTed to a registered Tabby webhook endpoint when a payment changes state.",
+  "type": "object",
+  "required": ["id", "status", "amount", "currency"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid", "description": "Payment id." },
+    "status": {
+      "type": "string",
+      "enum": ["authorized", "captured", "closed", "rejected", "expired", "refunded", "updated"],
+      "description": "Webhook event type — derived from the payment lifecycle."
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "amount": { "type": "string" },
+    "currency": { "type": "string", "enum": ["AED", "SAR", "KWD"] },
+    "order": {
+      "type": "object",
+      "properties": {
+        "reference_id": { "type": "string" }
+      }
+    },
+    "captures": { "type": "array", "items": { "$ref": "tabby-capture-schema.json" } },
+    "refunds": { "type": "array", "items": { "$ref": "tabby-refund-schema.json" } },
+    "meta": { "type": "object" },
+    "token": { "type": "string" }
+  }
+}

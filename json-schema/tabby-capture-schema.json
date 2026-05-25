@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/tabby/main/json-schema/tabby-capture-schema.json",
+  "title": "TabbyCapture",
+  "description": "Tabby capture entry created by POST /api/v2/payments/{id}/captures.",
+  "type": "object",
+  "required": ["amount", "reference_id"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "amount": { "type": "string" },
+    "reference_id": {
+      "type": "string",
+      "description": "Idempotency key — repeating the same value is a no-op."
+    },
+    "tax_amount": { "type": "string", "default": "0.00" },
+    "shipping_amount": { "type": "string", "default": "0.00" },
+    "discount_amount": { "type": "string", "default": "0.00" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "tabby-order-item-schema.json" }
+    }
+  }
+}

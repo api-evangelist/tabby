@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/tabby/main/json-schema/tabby-order-item-schema.json",
+  "title": "TabbyOrderItem",
+  "description": "Tabby order line item used in checkout, capture, and refund payloads.",
+  "type": "object",
+  "required": ["title", "quantity", "unit_price", "category"],
+  "properties": {
+    "title": { "type": "string" },
+    "quantity": { "type": "integer", "minimum": 1 },
+    "unit_price": { "type": "string" },
+    "category": { "type": "string" },
+    "reference_id": { "type": "string", "description": "SKU or product identifier." },
+    "description": { "type": "string" },
+    "discount_amount": { "type": "string" },
+    "image_url": { "type": "string", "format": "uri" },
+    "product_url": { "type": "string", "format": "uri" },
+    "gender": { "type": "string", "enum": ["Male", "Female", "Kids", "Other"] },
+    "color": { "type": "string" },
+    "product_material": { "type": "string" },
+    "size_type": { "type": "string", "enum": ["EU", "UK"] },
+    "size": { "type": "string" },
+    "brand": { "type": "string" },
+    "is_refundable": { "type": "boolean" },
+    "barcode": { "type": "string" },
+    "ppn": { "type": "string", "description": "Product Part Number." },
+    "seller": { "type": "string" }
+  }
+}

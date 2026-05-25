@@ -1,0 +1,192 @@
+vocabulary: tabby
+version: 0.1.0
+provider: Tabby
+providerId: tabby
+description: Operational and capability vocabulary for the Tabby buy-now-pay-later API surface — checkout
+  sessions, payments lifecycle, webhooks, disputes, and merchant integration.
+sources:
+  - https://docs.tabby.ai
+  - https://docs.tabby.ai/openapi.yaml
+domains:
+  - id: bnpl
+    label: Buy Now Pay Later
+    description: Split-purchase consumer credit at point of sale (Pay-in-4 interest-free and monthly plans
+      up to 12 months).
+  - id: payments
+    label: Payments
+    description: Authorize / capture / refund / close lifecycle for BNPL payments.
+  - id: checkout
+    label: Checkout
+    description: Hosted checkout flow that scores the buyer and returns a web_url or QR.
+  - id: webhooks
+    label: Webhooks
+    description: Outbound event notifications for payment state changes.
+  - id: disputes
+    label: Disputes
+    description: Chargeback and dispute resolution surface for live merchants.
+  - id: merchant
+    label: Merchant
+    description: Merchant identity (merchant_code), plugins, and onboarding.
+concepts:
+  - id: PayInFour
+    label: Pay in 4
+    description: Tabby's flagship interest-free product splitting a purchase into 4 biweekly payments.
+  - id: PayMonthly
+    label: Pay Monthly
+    description: Up to 12 monthly installments for larger purchases.
+  - id: TabbyCard
+    label: Tabby Card
+    description: Visa-enabled BNPL card usable anywhere Visa is accepted.
+  - id: TabbyShop
+    label: Tabby Shop
+    description: Discovery and price-tracking app that drives merchant traffic.
+  - id: TabbyCare
+    label: Tabby Care
+    description: Purchase-protection and return-assistance product.
+  - id: TabbyPlus
+    label: Tabby Plus
+    description: Loyalty programme rewarding repeat use across the Tabby network.
+  - id: PreScoring
+    label: Pre-Scoring
+    description: Real-time consumer underwriting performed at session creation time; returns approved /
+      rejected / expired.
+  - id: ShariahCompliant
+    label: Shariah Compliant
+    description: Tabby removed all late fees in 2023 to maintain Shariah compliance in Saudi Arabia; revenue
+      is merchant-funded.
+operations:
+  - id: createSession
+    label: Create Checkout Session
+    method: POST
+    path: /api/v2/checkout
+    domain: checkout
+  - id: getSession
+    label: Get Checkout Session
+    method: GET
+    path: /api/v2/checkout/{id}
+    domain: checkout
+  - id: getPayment
+    label: Get Payment
+    method: GET
+    path: /api/v2/payments/{id}
+    domain: payments
+  - id: listPayments
+    label: List Payments
+    method: GET
+    path: /api/v2/payments
+    domain: payments
+  - id: updatePayment
+    label: Update Payment Reference
+    method: PUT
+    path: /api/v2/payments/{id}
+    domain: payments
+  - id: capturePayment
+    label: Capture Payment
+    method: POST
+    path: /api/v2/payments/{id}/captures
+    domain: payments
+  - id: refundPayment
+    label: Refund Payment
+    method: POST
+    path: /api/v2/payments/{id}/refunds
+    domain: payments
+  - id: closePayment
+    label: Close Payment
+    method: POST
+    path: /api/v2/payments/{id}/close
+    domain: payments
+  - id: registerWebhook
+    label: Register Webhook
+    method: POST
+    path: /api/v1/webhooks
+    domain: webhooks
+  - id: listWebhooks
+    label: List Webhooks
+    method: GET
+    path: /api/v1/webhooks
+    domain: webhooks
+  - id: getWebhook
+    label: Get Webhook
+    method: GET
+    path: /api/v1/webhooks/{id}
+    domain: webhooks
+  - id: updateWebhook
+    label: Update Webhook
+    method: PUT
+    path: /api/v1/webhooks/{id}
+    domain: webhooks
+  - id: deleteWebhook
+    label: Delete Webhook
+    method: DELETE
+    path: /api/v1/webhooks/{id}
+    domain: webhooks
+  - id: listDisputes
+    label: List Disputes
+    method: GET
+    path: /api/v1/disputes
+    domain: disputes
+  - id: getDispute
+    label: Get Dispute
+    method: GET
+    path: /api/v1/disputes/{disputeId}
+    domain: disputes
+  - id: provideEvidence
+    label: Provide Dispute Evidence
+    method: POST
+    path: /api/v1/disputes/{disputeId}/provide-evidence
+    domain: disputes
+  - id: approveDisputes
+    label: Approve Disputes (Bulk)
+    method: POST
+    path: /api/v1/disputes/approve
+    domain: disputes
+  - id: challengeDisputes
+    label: Challenge Disputes (Bulk)
+    method: POST
+    path: /api/v1/disputes/challenge
+    domain: disputes
+  - id: uploadAttachment
+    label: Upload Dispute Attachment
+    method: POST
+    path: /api/v1/disputes/upload-attachment
+    domain: disputes
+events:
+  - id: payment.authorized
+    label: Payment Authorized
+    description: Customer completed pre-scoring and authorization at checkout.
+  - id: payment.captured
+    label: Payment Captured
+    description: Funds captured by the merchant (full or partial).
+  - id: payment.closed
+    label: Payment Closed
+    description: Merchant finalised the payment.
+  - id: payment.rejected
+    label: Payment Rejected
+    description: Buyer rejected during checkout.
+  - id: payment.expired
+    label: Payment Expired
+    description: Buyer canceled or payment timed out.
+  - id: payment.refunded
+    label: Payment Refunded
+    description: Refund processed (full or partial).
+  - id: payment.updated
+    label: Payment Updated
+    description: Merchant reference_id updated.
+geographies:
+  - code: SA
+    label: Saudi Arabia
+    currency: SAR
+    host: https://api.tabby.sa
+  - code: AE
+    label: United Arab Emirates
+    currency: AED
+    host: https://api.tabby.ai
+  - code: KW
+    label: Kuwait
+    currency: KWD
+    host: https://api.tabby.ai
+languages:
+  - code: en
+    label: English
+  - code: ar
+    label: Arabic

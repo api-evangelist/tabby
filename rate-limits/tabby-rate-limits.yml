@@ -1,0 +1,60 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Tabby
+providerId: tabby
+created: '2026-05-24'
+modified: '2026-05-24'
+reconciled: false
+tags:
+  - BNPL
+  - Payments
+  - Rate Limiting
+description: 'Tabby does not publish formal per-merchant request-rate or throughput numbers in its public
+  documentation. Practical limits documented below are derived from the OpenAPI surface and behavioural notes
+  in the merchant docs. Webhook delivery has explicit retry semantics (1m timeout, 4 retries with 1-4 minute
+  exponential backoff).'
+sources:
+  - https://docs.tabby.ai/api-reference/overview
+  - https://docs.tabby.ai/api-reference/disputes
+  - https://docs.tabby.ai/pay-in-4-custom-integration/webhooks
+headers:
+  retryAfter: retry-after
+responseCodes:
+  throttled: 429
+  quotaExceeded: 429
+  authFailure: 401
+  forbidden: 403
+algorithm: undisclosed
+limits:
+  - resource: /api/v1/disputes/approve
+    perRequestMax: 20
+    note: 'Maximum 20 dispute approvals per single request — bulk-approve in batches.'
+  - resource: /api/v1/disputes
+    listingMax: 100
+    note: 'GET /api/v1/disputes returns the 100 most recently created disputes.'
+  - resource: /api/v1/disputes/upload-attachment
+    maxFileSize: 5242880
+    allowedContentTypes:
+      - image/png
+      - image/jpeg
+      - application/pdf
+    note: 'Dispute evidence attachments capped at 5MB. PNG, JPEG, or PDF only.'
+webhookDelivery:
+  acknowledgementCode: 200
+  timeoutSeconds: 60
+  maxRetries: 4
+  retryStrategy: exponential
+  retryIntervalMinutes:
+    min: 1
+    max: 4
+  notes:
+    - 'A non-200 response (or no response within 1 minute) triggers retry.'
+    - 'Subsequent attempts are spaced at exponentially increasing intervals between 1 and 4 minutes.'
+    - 'Acknowledge immediately with 200 then process asynchronously to avoid retries.'
+recommendations:
+  - 'Use the reference_id field as an idempotency key on captures and refunds; repeated calls with the
+    same reference_id are a no-op rather than duplicates.'
+  - 'Whitelist Tabby webhook source IPs (provided to merchants on request) at your edge.'
+  - 'Validate the checkout session status is "created" before redirecting the buyer; do not retry session
+    creation on "rejected" — the consumer was declined.'
