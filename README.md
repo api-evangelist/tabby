@@ -1,130 +1,170 @@
 # Tabby (tabby)
 
-Tabby is the MENA region's largest buy-now-pay-later (BNPL) provider, founded in 2019 by Hosam Arab (ex-Namshi) and Daniil Barkalov, originally in Dubai and now headquartered in Riyadh ahead of a planned IPO. Tabby reached a $3.3B valuation in a February 2025 Series E ($160M co-led by Blue Pool Capital and Hassana Investment Company), making it the most valuable fintech in the Middle East, with 15M+ users, 40,000+ merchants, and $10B+ in annualized transaction volume across KSA, UAE, and Kuwait. The Tabby API powers split-purchase checkouts (Pay-in-4 interest-free, monthly plans up to 12 months), payment lifecycle management, webhooks, and dispute resolution, complemented by Tabby Card (Visa-enabled), Tabby Shop discovery, Tabby Care purchase protection, and the Tabby Plus loyalty programme.
+Tabby is the MENA region's largest buy-now-pay-later (BNPL) provider, founded in 2019 by Hosam Arab (ex-Namshi) and Daniil Barkalov, originally in Dubai and now headquartered in Riyadh ahead of a planned IPO. Tabby reached a $3.3B valuation in a February 2025 Series E ($160M co-led by Blue Pool Capital and Hassana Investment Company), making it the most valuable fintech in the Middle East, and reports 15M+ users, 40,000+ merchants, and $10B+ in annualized transaction volume across KSA, UAE, and Kuwait. The Tabby API powers split-purchase checkouts (Pay-in-4 interest-free, monthly plans up to 12 months), payment lifecycle management, webhooks, and dispute resolution, complemented by Tabby Card (Visa-enabled), Tabby Shop discovery, Tabby Care purchase protection, and the Tabby Plus loyalty programme. Public developer surface includes a versioned REST API across two regional hosts (api.tabby.ai for UAE/Kuwait, api.tabby.sa for KSA), an OpenAPI 3.1 specification, iOS / Android / Flutter / React Native SDKs, and certified Magento 2, Shopify, WooCommerce, Salla, Zid, OpenCart, ExpandCart, Matjrah, Salesforce, and Odoo plugins.
 
-**URL:** [Visit APIs.json](https://raw.githubusercontent.com/api-evangelist/tabby/refs/heads/main/apis.yml)
+**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/tabby/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/tabby/refs/heads/main/apis.yml)
 
-**Run:** [Capabilities Using Naftiko](https://github.com/naftiko/fleet?utm_source=api-evangelist&utm_medium=readme&utm_campaign=company-api-evangelist&utm_content=repo)
+## Scope
+
+- **Access:** 3rd-Party
 
 ## Tags
 
- - BNPL, Buy Now Pay Later, Consumer Finance, E-commerce, Fintech, Installments, MENA, Payments, Saudi Arabia, UAE
-
-## Timestamps
-
-- **Created:** 2026-05-24
-- **Modified:** 2026-05-24
-
-## Regions
-
-| Region | Production Host | Currency | Checkout Host |
-|---|---|---|---|
-| UAE / Kuwait | `https://api.tabby.ai` | AED / KWD | `https://checkout.tabby.ai` |
-| Saudi Arabia | `https://api.tabby.sa` | SAR | `https://checkout.tabby.sa` |
-
-All paths and payloads are identical across both hosts.
+- BNPL
+- Buy Now Pay Later
+- Consumer Finance
+- E-commerce
+- Fintech
+- Installments
+- MENA
+- Payments
+- Saudi Arabia
+- UAE
 
 ## APIs
 
 ### Tabby Checkout API
-Create and retrieve hosted Tabby checkout sessions. Posts the buyer, order, and buyer-history payload to `/api/v2/checkout` and returns a pre-scoring result with a hosted `web_url` (or QR) the customer follows to complete Pay-in-4 or monthly installment authorization.
 
-**Human URL:** [https://docs.tabby.ai/api-reference/checkout/create-a-session](https://docs.tabby.ai/api-reference/checkout/create-a-session)
+Create and retrieve Tabby Checkout sessions. Posting customer, order, and buyer-history data to /api/v2/checkout creates a Session plus Payment and returns a pre-scoring result with a hosted web_url (or QR code) that the buyer follows to complete Pay-in-4 or monthly-installment authorization. Supports AED, SAR, and KWD across two regional production hosts (api.tabby.ai for UAE/Kuwait, api.tabby.sa for KSA).
 
+- **Human URL:** [https://docs.tabby.ai/api-reference/checkout/create-a-session](https://docs.tabby.ai/api-reference/checkout/create-a-session)
+
+#### Tags
+
+- BNPL
+- Buy Now Pay Later
+- Checkout
+- Payments
+- Sessions
+
+#### Properties
+
+- [Documentation](https://docs.tabby.ai/api-reference/checkout/create-a-session)
 - [Documentation](https://docs.tabby.ai/api-reference/overview)
-- [OpenAPI](openapi/tabby-api-openapi.yml)
-- [JSON Schema — Checkout Session](json-schema/tabby-checkout-session-schema.json)
-- [JSON Schema — Order Item](json-schema/tabby-order-item-schema.json)
-- [JSON-LD](json-ld/tabby-context.jsonld)
-- [Naftiko Capability — Checkout Sessions](capabilities/checkout-sessions.yaml)
+- [OpenAPI](openapi/tabby-api-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Postman Collection](collections/tabby-api.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/tabby-api.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [JSON Schema](json-schema/tabby-checkout-session-schema.json) — [JSON Schema](https://json-schema.org/specification)
+- [JSON Schema](json-schema/tabby-order-item-schema.json) — [JSON Schema](https://json-schema.org/specification)
+- [JSON-LD](json-ld/tabby-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
 
 ### Tabby Payments API
-Lifecycle management for an authorized Tabby BNPL payment — retrieve, list, update merchant reference_id, capture (full or partial), refund (full or partial with line items), and close.
 
-**Human URL:** [https://docs.tabby.ai/api-reference/payments/retrieve-a-payment](https://docs.tabby.ai/api-reference/payments/retrieve-a-payment)
+Lifecycle management for an authorized Tabby BNPL payment. Retrieve a payment by id, list payments with pagination/status filters, update the merchant reference_id, capture authorized funds (full or partial), refund a closed payment (full or partial with line items), and close a payment when fulfilment is complete. All endpoints require a secret-key Bearer token.
 
-- [Documentation — Capture](https://docs.tabby.ai/api-reference/payments/capture-a-payment)
-- [Documentation — Refund](https://docs.tabby.ai/api-reference/payments/refund-a-payment)
-- [Documentation — Close](https://docs.tabby.ai/api-reference/payments/close-a-payment)
-- [OpenAPI](openapi/tabby-api-openapi.yml)
-- [JSON Schema — Payment](json-schema/tabby-payment-schema.json)
-- [JSON Schema — Capture](json-schema/tabby-capture-schema.json)
-- [JSON Schema — Refund](json-schema/tabby-refund-schema.json)
-- [Naftiko Capability — Payments](capabilities/payments-payments.yaml)
-- [Naftiko Capability — Captures](capabilities/payments-captures.yaml)
-- [Naftiko Capability — Refunds](capabilities/payments-refunds.yaml)
+- **Human URL:** [https://docs.tabby.ai/api-reference/payments/retrieve-a-payment](https://docs.tabby.ai/api-reference/payments/retrieve-a-payment)
+
+#### Tags
+
+- BNPL
+- Buy Now Pay Later
+- Captures
+- Payments
+- Refunds
+
+#### Properties
+
+- [Documentation](https://docs.tabby.ai/api-reference/payments/retrieve-a-payment)
+- [Documentation](https://docs.tabby.ai/api-reference/payments/capture-a-payment)
+- [Documentation](https://docs.tabby.ai/api-reference/payments/refund-a-payment)
+- [Documentation](https://docs.tabby.ai/api-reference/payments/close-a-payment)
+- [OpenAPI](openapi/tabby-api-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Postman Collection](collections/tabby-api.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/tabby-api.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [JSON Schema](json-schema/tabby-payment-schema.json) — [JSON Schema](https://json-schema.org/specification)
+- [JSON Schema](json-schema/tabby-capture-schema.json) — [JSON Schema](https://json-schema.org/specification)
+- [JSON Schema](json-schema/tabby-refund-schema.json) — [JSON Schema](https://json-schema.org/specification)
 
 ### Tabby Webhooks API
-Register, list, retrieve, update, and remove HTTPS webhook endpoints scoped to a `merchant_code`. Tabby delivers `authorize`, `capture`, `close`, `reject`, `expire`, `refund`, and `update` events with optional arbitrary auth-header signing; failed deliveries retry with exponential backoff (1m timeout, 4 retries, 1-4 minute intervals).
 
-**Human URL:** [https://docs.tabby.ai/api-reference/webhooks/register-a-webhook](https://docs.tabby.ai/api-reference/webhooks/register-a-webhook)
+Register, list, retrieve, update, and remove Tabby webhook endpoints scoped to a merchant_code. Tabby fires authorize, capture, close, reject, expire, refund, and update events as JSON POSTs to your HTTPS endpoint with optional arbitrary auth-header signing. Failed deliveries retry with exponential backoff (1m timeout, up to 4 retries at 1-4 minute intervals).
 
-- [OpenAPI](openapi/tabby-api-openapi.yml)
-- [JSON Schema — Webhook Event](json-schema/tabby-webhook-event-schema.json)
-- [Naftiko Capability — Webhooks](capabilities/webhooks-webhooks.yaml)
+- **Human URL:** [https://docs.tabby.ai/api-reference/webhooks/register-a-webhook](https://docs.tabby.ai/api-reference/webhooks/register-a-webhook)
+
+#### Tags
+
+- BNPL
+- Buy Now Pay Later
+- Events
+- Webhooks
+
+#### Properties
+
+- [Documentation](https://docs.tabby.ai/api-reference/webhooks/register-a-webhook)
+- [OpenAPI](openapi/tabby-api-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Postman Collection](collections/tabby-api.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/tabby-api.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [JSON Schema](json-schema/tabby-webhook-event-schema.json) — [JSON Schema](https://json-schema.org/specification)
 
 ### Tabby Disputes API
-Programmatic dispute handling mirroring the Tabby Merchant Dashboard — list the 100 most recent disputes, retrieve a single dispute, provide evidence, and bulk-approve (max 20 per request, refunds customer) or challenge new disputes. Upload PNG/JPEG/PDF evidence up to 5MB. Live payments only.
 
-**Human URL:** [https://docs.tabby.ai/api-reference/disputes](https://docs.tabby.ai/api-reference/disputes)
+Programmatic dispute handling mirroring the Tabby Merchant Dashboard. List the 100 most recent disputes, retrieve a single dispute, provide evidence, and bulk-approve (up to 20 at a time, refunds the customer) or challenge new disputes for support review. Upload PNG/JPEG/PDF evidence attachments up to 5MB. Live payments only with secret-key Bearer auth.
 
-- [OpenAPI](openapi/tabby-api-openapi.yml)
-- [JSON Schema — Dispute](json-schema/tabby-dispute-schema.json)
-- [Naftiko Capability — Disputes](capabilities/disputes-disputes.yaml)
+- **Human URL:** [https://docs.tabby.ai/api-reference/disputes](https://docs.tabby.ai/api-reference/disputes)
 
-## SDKs and Plugins
+#### Tags
 
-Tabby maintains its open-source integrations under [github.com/tabby-ai](https://github.com/tabby-ai):
+- BNPL
+- Buy Now Pay Later
+- Disputes
+- Chargebacks
 
-| Surface | Repository | Language | License |
-|---|---|---|---|
-| iOS | [tabby-ios-sdk](https://github.com/tabby-ai/tabby-ios-sdk) | Swift | — |
-| Android | [tabby-android-sdk](https://github.com/tabby-ai/tabby-android-sdk) | Kotlin | — |
-| Flutter | [tabby_flutter_inapp_sdk](https://github.com/tabby-ai/tabby_flutter_inapp_sdk) | Dart | MIT |
-| React Native | [react-native-example](https://github.com/tabby-ai/react-native-example) | TypeScript | — |
-| Magento 2 — Checkout | [m2-checkout](https://github.com/tabby-ai/m2-checkout) | PHP | — |
-| Magento 2 — Payments | [m2-payments](https://github.com/tabby-ai/m2-payments) | PHP | — |
-| Magento 2 — Marketplace Feed | [m2-feed](https://github.com/tabby-ai/m2-feed) | PHP | — |
-| Magento 2 — Additional Merchant ID | [m2-sub](https://github.com/tabby-ai/m2-sub) | PHP | — |
-| Odoo | [odoo](https://github.com/tabby-ai/odoo) | Python | — |
-| Hijri calendar | [hijri-converter](https://github.com/tabby-ai/hijri-converter) | TypeScript | MIT |
+#### Properties
 
-Certified storefront plugins (docs-only): Shopify, WooCommerce, Salla, Zid, OpenCart, ExpandCart, Matjrah, Salesforce.
+- [Documentation](https://docs.tabby.ai/api-reference/disputes)
+- [OpenAPI](openapi/tabby-api-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Postman Collection](collections/tabby-api.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/tabby-api.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [JSON Schema](json-schema/tabby-dispute-schema.json) — [JSON Schema](https://json-schema.org/specification)
 
-## Examples
+## Common Properties
 
-- [Create checkout session](examples/tabby-create-checkout-session-example.json)
-- [Capture payment](examples/tabby-capture-payment-example.json)
-- [Refund payment](examples/tabby-refund-payment-example.json)
-- [Register webhook](examples/tabby-register-webhook-example.json)
-- [Webhook event payload](examples/tabby-webhook-event-example.json)
-
-## Commercial and FinOps
-
-- [Plans — API Commons 0.1](plans/tabby-plans-pricing.yml)
-- [Rate Limits — API Commons 0.1](rate-limits/tabby-rate-limits.yml)
-- [FinOps — FOCUS 1.3](finops/tabby-finops.yml)
-
-## Governance
-
+- [Website](https://tabby.ai)
+- [Website](https://tabby.ai/en-AE/business)
+- [Portal](https://docs.tabby.ai)
+- [Documentation](https://docs.tabby.ai/api-reference/overview)
+- [Getting Started](https://docs.tabby.ai/introduction/quick-start)
+- [OpenAPI](https://docs.tabby.ai/openapi.yaml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Documentation](https://docs.tabby.ai/pay-in-4-custom-integration/testing-credentials)
+- [Documentation](https://docs.tabby.ai/pay-in-4-custom-integration/full-testing-checklist)
+- [Documentation](https://docs.tabby.ai/pay-in-4-custom-integration/webhooks)
+- [Documentation](https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses)
+- [Github](https://github.com/tabby-ai)
+- [SDK](https://github.com/tabby-ai/tabby-ios-sdk)
+- [SDK](https://github.com/tabby-ai/tabby-android-sdk)
+- [SDK](https://github.com/tabby-ai/tabby_flutter_inapp_sdk)
+- [SDK](https://github.com/tabby-ai/react-native-example)
+- [Plugin](https://github.com/tabby-ai/m2-checkout)
+- [Plugin](https://github.com/tabby-ai/m2-payments)
+- [Plugin](https://github.com/tabby-ai/m2-feed)
+- [Plugin](https://github.com/tabby-ai/m2-sub)
+- [Plugin](https://github.com/tabby-ai/odoo)
+- [SDK](https://github.com/tabby-ai/hijri-converter)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/shopify/shopify-plugin-installation)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/woocommerce)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/salla)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/zid)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/opencart/opencart-plugin-installation)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/expandcart)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/matjrah)
+- [Plugin](https://docs.tabby.ai/e-commerce-platforms/salesforce)
+- [Documentation](https://docs.tabby.ai/offline-payment-methods/pos-integration)
+- [Documentation](https://docs.tabby.ai/offline-payment-methods/custom-payment-links)
+- [Documentation](https://docs.tabby.ai/mobile-app-sdks/ios-sdk)
+- [Logos](https://docs.tabby.ai/marketing-resources/brand-assets)
+- [LinkedIn](https://www.linkedin.com/company/tabby/)
+- [Twitter](https://twitter.com/tabby)
+- [Instagram](https://www.instagram.com/tabby/)
+- [Blog](https://tabby.ai/en-AE/newsroom)
+- [Pricing](https://tabby.ai/en-AE/help-business/about-tabby/pricing)
+- [Plans](plans/tabby-plans-pricing.yml)
+- [Rate Limits](rate-limits/tabby-rate-limits.yml)
+- [Fin Ops](finops/tabby-finops.yml)
+- [Spectral Rules](rules/tabby-rules.yml)
 - [Vocabulary](vocabulary/tabby-vocabulary.yml)
-- [Spectral Ruleset](rules/tabby-rules.yml)
-- [JSON-LD Context](json-ld/tabby-context.jsonld)
 
-## Common Resources
+## Maintainers
 
-- [Tabby Developer Docs](https://docs.tabby.ai)
-- [API Reference](https://docs.tabby.ai/api-reference/overview)
-- [Quick Start](https://docs.tabby.ai/introduction/quick-start)
-- [Upstream OpenAPI](https://docs.tabby.ai/openapi.yaml)
-- [Testing Credentials](https://docs.tabby.ai/pay-in-4-custom-integration/testing-credentials)
-- [Testing Checklist](https://docs.tabby.ai/pay-in-4-custom-integration/full-testing-checklist)
-- [Webhooks Guide](https://docs.tabby.ai/pay-in-4-custom-integration/webhooks)
-- [Payment Statuses](https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses)
-- [POS Integration](https://docs.tabby.ai/offline-payment-methods/pos-integration)
-- [Custom Payment Links](https://docs.tabby.ai/offline-payment-methods/custom-payment-links)
-- [Brand Assets](https://docs.tabby.ai/marketing-resources/brand-assets)
-- [Merchant Pricing FAQ](https://tabby.ai/en-AE/help-business/about-tabby/pricing)
-- [Tabby Newsroom](https://tabby.ai/en-AE/newsroom)
-- [Tabby on LinkedIn](https://www.linkedin.com/company/tabby/)
-- [Tabby on X](https://twitter.com/tabby)
+**FN:** Tabby
+**Email:** partners@tabby.ai
+**URL:** https://docs.tabby.ai
