@@ -150,16 +150,16 @@ common:
     type: Github
   - url: https://github.com/tabby-ai/tabby-ios-sdk
     name: Tabby iOS SDK (Swift)
-    type: SDK
+    type: SDKs
   - url: https://github.com/tabby-ai/tabby-android-sdk
     name: Tabby Android SDK (Kotlin)
-    type: SDK
+    type: SDKs
   - url: https://github.com/tabby-ai/tabby_flutter_inapp_sdk
     name: Tabby Flutter In-App SDK (Dart, MIT)
-    type: SDK
+    type: SDKs
   - url: https://github.com/tabby-ai/react-native-example
     name: Tabby React Native Example
-    type: SDK
+    type: SDKs
   - url: https://github.com/tabby-ai/m2-checkout
     name: Tabby Magento 2 Checkout Plugin
     type: Plugin
@@ -177,7 +177,7 @@ common:
     type: Plugin
   - url: https://github.com/tabby-ai/hijri-converter
     name: Tabby Hijri Converter (TypeScript, MIT)
-    type: SDK
+    type: SDKs
   - url: https://docs.tabby.ai/e-commerce-platforms/shopify/shopify-plugin-installation
     name: Tabby Shopify Plugin
     type: Plugin
