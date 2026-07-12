@@ -1,0 +1,14 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/tabby-api-openapi.yml
+summary:
+  types:
+  - http
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  description: Bearer authentication header of the form `Bearer <secret_key>`, where `<secret_key>`
+    is your `secret_key`.
+  sources:
+  - openapi/tabby-api-openapi.yml
