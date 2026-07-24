@@ -1,0 +1,750 @@
+openapi: 3.1.0
+info:
+  title: Tabby API Reference Checkout Disputes API
+  version: 1.0.0
+  x-logo:
+    url: assets/tabby-new.png
+    altText: tabby Logo
+  description: 'Tabby Documentation:  **[docs.tabby.ai](https://docs.tabby.ai/)**
+
+    '
+servers:
+- url: https://api.tabby.ai/
+  description: Production (UAE, Kuwait)
+- url: https://api.tabby.sa/
+  description: Production (KSA)
+tags:
+- name: Disputes
+  description: The Disputes API is designed to simplify the process of handling disputes and help merchants resolve issues with customer orders more efficiently. Merchants can use this API to retrieve a list of disputes, view details about a specific dispute, and approve or challenge a bunch of disputes. It mirrors the functionality available in Tabby Merchant Dashboard and operates exclusively with live payments using live credentials. A secret key is required for using the Disputes API. <SchemaDefinition schemaRef="#/components/schemas/Webhook" />
+paths:
+  /api/v1/disputes:
+    get:
+      tags:
+      - Disputes
+      summary: Get disputes list
+      description: Returns list of 100 recently created disputes.
+      operationId: getDisputes
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - in: query
+        name: statuses
+        schema:
+          type: array
+          items:
+            type: string
+            description: DisputeStatus
+          enum:
+          - new
+          - declined
+          - cancelled
+          - refunded
+          - in_progress
+          - evidence_merchant
+          - evidence_customer
+          example: statuses=new&statuses=declined
+        description: Dispute status. If not set, then all statuses will be in result.
+      - in: query
+        name: created_at_gte
+        schema:
+          type: string
+          example: created_at_gte=2022-12-01T00:00:00Z
+        description: Filter disputes created after or at the specified date and time.
+      - in: query
+        name: created_at_lte
+        schema:
+          type: string
+          example: created_at_lte=2022-12-01T00:00:00Z
+        description: Filter disputes created before or at the specified date and time.
+      - in: query
+        name: page_token
+        schema:
+          type: string
+        description: To load the next page of disputed items provide page token. This code can be obtained from the `next_page_token` variable in the response of dispute list. If `next_page_token` is empty in response, it means last page of disputes has been reached.
+      responses:
+        '200':
+          $ref: '#/components/responses/Disputes'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/disputes/{disputeId}:
+    get:
+      tags:
+      - Disputes
+      summary: Get dispute by id
+      description: Returns detailed information about dispute.
+      operationId: getDispute
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/disputeIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dispute'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError_Disputes'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/disputes/{disputeId}/provide-evidence:
+    post:
+      tags:
+      - Disputes
+      summary: Provide evidence for a dispute
+      description: Provide evidence (text and/or attachments) for a dispute. Used by the merchant to submit proof in response to an evidence request.
+      operationId: postDisputeProvideEvidence
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/disputeIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: I am providing a photo of the damaged product that was received
+                  description: Text content of the evidence being provided.
+                attachment_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                    example: attachment id, uuid format
+                  description: Array of attachment IDs to include as evidence. IDs can be received via `upload attachment` endpoint.
+              required:
+              - content
+      responses:
+        '200':
+          $ref: '#/components/responses/DisputeProvideEvidence'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError_Disputes'
+        '409':
+          $ref: '#/components/responses/DisputeProvideEvidenceConflict'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/disputes/approve:
+    post:
+      tags:
+      - Disputes
+      summary: Approve disputes
+      description: Approve disputes (refund money to the customer). Only 20 disputes can be approved within a single request.
+      operationId: postDisputesApprove
+      security:
+      - bearerAuth:
+        - secret_key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dispute_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                    example: dispute id, uuid format
+                  description: Array of dispute ids. Only 20 disputes can be approved within a single request.
+              required:
+              - dispute_ids
+      responses:
+        '200':
+          $ref: '#/components/responses/DisputesApprove'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/disputes/challenge:
+    post:
+      tags:
+      - Disputes
+      summary: Challenge disputes
+      description: Challenge disputes (request Tabby support to take a look at the case). Only 20 disputes can be challenged within a single request. Only disputes with status 'new' might be challenged.
+      operationId: postDisputesChallenge
+      security:
+      - bearerAuth:
+        - secret_key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dispute_id:
+                  type: string
+                  example: uuid
+                  description: ID of the dispute
+                description:
+                  type: string
+                  example: Comment for Tabby support
+                  description: Comment for Tabby support.
+                reason:
+                  type: string
+                  enum:
+                  - merchant_reason_other
+                  - merchant_reason_order_on_its_way
+                  - merchant_reason_order_has_been_already_delivered
+                  - merchant_reason_order_amount_should_be_different
+                  - merchant_reason_problem_with_delivery
+                  example: merchant_reason_other
+                  description: "Reason for requesting dispute challenge:\n  - `merchant_reason_other` - there were other problems with the order that required further clarification;\n  - `merchant_reason_order_on_its_way` - the order has been confirmed and is in the process of being delivered;\n  - `merchant_reason_order_has_been_already_delivered` - the order has already been delivered and is complete;\n  - `merchant_reason_order_amount_should_be_different` - there was a problem with the amount of the order and it needed to be changed;\n  - `merchant_reason_problem_with_delivery` - there was a problem with the order during delivery that needed to be adjusted and resolved.\n"
+                amount:
+                  type: string
+                  example: '100'
+                  description: If the dispute challenged with reason `merchant_reason_order_amount_should_be_different` - a new disputed amount is required.
+                attachment_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                    example: attachment id, uuid format
+                  description: Attachment ID that will be attached. ID can be received via `upload attachment` endpoint.
+              required:
+              - dispute_id
+              - description
+              - reason
+      responses:
+        '200':
+          $ref: '#/components/responses/DisputesChallenge'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/disputes/attachments/upload:
+    post:
+      tags:
+      - Disputes
+      summary: Upload attachment
+      description: Upload an attachment. Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.
+      operationId: postUploadAttachment
+      security:
+      - bearerAuth:
+        - secret_key
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                attachment:
+                  type: string
+                  format: binary
+                  description: Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.
+              required:
+              - attachment
+      responses:
+        '200':
+          $ref: '#/components/responses/DisputeAttachmentUpload'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+components:
+  schemas:
+    DisputeAttachments:
+      type: array
+      nullable: true
+      items:
+        type: string
+        example: attachment_1
+      readOnly: true
+      description: Array of links to images which were uploaded by customer.
+    Error_401_invalid_secret_key:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: invalid secret key
+    Error_404_dispute_not_found:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_found
+        error:
+          type: string
+          example: dispute not found
+    Dispute:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DisputeID'
+        attachments:
+          $ref: '#/components/schemas/DisputeAttachments'
+        payment_id:
+          $ref: '#/components/schemas/PaymentID'
+          description: ID of the payment.
+        amount:
+          type: string
+          example: '100.00'
+          description: Total disputed amount.
+        currency:
+          $ref: '#/components/schemas/Currency'
+          description: The currency of the dispute. It's always equal to the currency of the payment.
+        created_at:
+          $ref: '#/components/schemas/DisputeCreatedAt'
+        expired_at:
+          $ref: '#/components/schemas/DisputeExpiredAt'
+        status:
+          $ref: '#/components/schemas/DisputeStatus'
+        reason:
+          $ref: '#/components/schemas/DisputeReason'
+        days_left:
+          $ref: '#/components/schemas/DisputeDaysLeft'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeHistoryItem'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeOrderItem'
+        order_number:
+          type: string
+          example: '#1234'
+          description: Merchant-assigned order number.
+        comment:
+          $ref: '#/components/schemas/DisputeComment'
+      required:
+      - id
+      - attachments
+      - payment_id
+      - amount
+      - currency
+      - created_at
+      - expired_at
+      - status
+      - reason
+      - days_left
+      - history
+      - items
+      - order_number
+      - comment
+    Currency:
+      type: string
+      enum:
+      - AED
+      - SAR
+      - KWD
+      example: AED
+      description: "ISO 4217 currency code for the payment amount. Currently there are 3 possible currency options - depending on the country where the store is located:\n  - `AED` - United Arab Emirates Dirham\n  - `SAR` - Saudi Riyal\n  - `KWD` - Kuwaiti Dinar\n"
+    Evidence:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: evidence id, uuid format
+          description: Evidence ID.
+        dispute_id:
+          type: string
+          format: uuid
+          example: dispute id, uuid format
+          description: Dispute ID.
+        content:
+          type: string
+          example: I am providing a photo of the damaged product that was received
+          description: Evidence content.
+        created_by:
+          type: string
+          example: merchant
+          description: Who created the evidence.
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:30:00Z'
+          description: Creation timestamp in UTC, ISO 8601 datetime format.
+        attachment_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: attachment id, uuid format
+          description: Array of attachment IDs.
+      required:
+      - id
+      - dispute_id
+      - content
+      - created_by
+      - created_at
+    Error_404:
+      type: string
+      example: 404 page not found
+    DisputeID:
+      type: string
+      format: uuid
+      example: dispute id, uuid format
+      readOnly: true
+      description: ID of the dispute.
+    Error_500:
+      type: string
+      example: Internal Server error
+    DisputeComment:
+      type: string
+      example: additional comments
+      description: The customer additional comments on the causes of the dispute.
+    DisputeReason:
+      type: string
+      readOnly: true
+      enum:
+      - unreceived_refund
+      - identity_theft
+      - product_issue
+      - not_delivered
+      example: unreceived_refund
+      description: "Cause of the dispute was created (selected by customer). There are only four reasons:\n  - `unreceived_refund` - a refund not received\n  - `identity_theft` - I did not place this order (also known as identity theft)\n  - `product_issue` - there was a problem with the product\n  - `not_delivered` - the order was not delivered\n"
+    DisputeStatus:
+      type: string
+      readOnly: true
+      enum:
+      - new
+      - declined
+      - cancelled
+      - refunded
+      - in_progress
+      - evidence_merchant
+      - evidence_customer
+      example: new
+      description: "The current status of the dispute:\n  - `new` - dispute pending merchant approval for refund or initiate a challenge\n  - `declined` - dispute was declined by Tabby support\n  - `cancelled` - dispute was canceled by customer\n  - `refunded` - dispute was approved or the order was refunded via Payments API\n  - `in_progress` - merchant challenged dispute and need a response from Tabby support\n  - `evidence_merchant` - waiting for evidence from the merchant\n  - `evidence_customer` - waiting for evidence from the customer\n"
+    DisputeCreatedAt:
+      type: string
+      readOnly: true
+      example: 2018-10-17 00:00:00+00:00
+      description: Date and time the Dispute was created, in UTC, and displayed in ISO 8601 datetime format.
+    DisputeNoHistory:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DisputeID'
+        attachments:
+          $ref: '#/components/schemas/DisputeAttachments'
+        payment_id:
+          $ref: '#/components/schemas/PaymentID'
+          description: ID of the payment.
+        amount:
+          type: string
+          example: '100.00'
+          description: Total disputed amount.
+        currency:
+          $ref: '#/components/schemas/Currency'
+          description: The currency of the dispute. It's always equal to the currency of the payment.
+        created_at:
+          $ref: '#/components/schemas/DisputeCreatedAt'
+        expired_at:
+          $ref: '#/components/schemas/DisputeExpiredAt'
+        status:
+          $ref: '#/components/schemas/DisputeStatus'
+        reason:
+          $ref: '#/components/schemas/DisputeReason'
+        days_left:
+          $ref: '#/components/schemas/DisputeDaysLeft'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeOrderItem'
+        order_number:
+          type: string
+          example: '#1234'
+          description: Merchant-assigned order number.
+        comment:
+          $ref: '#/components/schemas/DisputeComment'
+      required:
+      - id
+      - attachments
+      - payment_id
+      - amount
+      - currency
+      - created_at
+      - expired_at
+      - status
+      - reason
+      - days_left
+      - items
+      - order_number
+      - comment
+    DisputeDaysLeft:
+      type: integer
+      format: uint16
+      description: How many days left before dispute will be automatically approved.
+    DisputeOrderItem:
+      type: object
+      properties:
+        reference_id:
+          type: string
+          example: payment id
+          description: Reference id from payment.
+        title:
+          type: string
+          example: Order item title
+          description: Order item title.
+        unit_price:
+          type: string
+          example: '100.00'
+          description: Order item unit price.
+      required:
+      - reference_id
+      - title
+      - unit_price
+    Error_400_bad_request:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: bad_request
+    DisputeExpiredAt:
+      type: string
+      readOnly: true
+      example: 2018-10-17 00:00:00+00:00
+      description: Date and time of the expiration of the Dispute, in UTC, and displayed in ISO 8601 datetime format.
+    Error_409:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: conflict
+        error:
+          type: string
+          example: payment is disputed
+    DisputeHistoryItem:
+      type: object
+      properties:
+        attachments:
+          type: array
+          items:
+            type: string
+            example: attachment_1
+          description: Array of links to images which were uploaded by customer or merchant.
+        created_at:
+          type: string
+          example: 2018-10-17 00:00:00+00:00
+          description: Date and time of creation of dispute history items, in UTC, and displayed in ISO 8601 datetime format.
+        created_by:
+          type: string
+          example: email address of the source
+          description: "Indicates the entity responsible for the creation of the record. It can take one of the following values:\n  - If `source` is set to `customer`, this field will contain the email address of the customer;\n  - If `source` is set to `merchant` and the action was performed through the merchant-dashboard, then field will contain the email address of the dashboard user;\n  - If `source` is set to `merchant` and the action was performed through the Disputes API, this field will contain the constant value 'Disputes API';\n  - If `source` is set to `tabby-support`, this field will be empty.\n"
+        content:
+          type: string
+          example: customer comment
+          description: "Contains additional information or comments related to the performed action. It can take one of the following values:\n  - If `source` is set to `customer`, this field will contain the customer's comment.\n  - If `source` is set to `merchant`, this field will contain the reason for the challenge.\n  - If `source` is set to `tabby-support`, this field will be empty.\n"
+        source:
+          type: string
+          enum:
+          - customer
+          - merchant
+          - tabby-support
+          example: merchant
+          description: "This field specifies author that led to the creation of the record. It can take one of the following values:\n  - `customer`: Indicates that the action was initiated by a customer;\n  - `merchant`: Indicates that the action was initiated by a merchant;\n  - `tabby-support`: Indicates that the action was initiated by Tabby support.\n"
+        event_type:
+          type: string
+          enum:
+          - dispute_created
+          - dispute_approved
+          - dispute_declined
+          - dispute_canceled
+          - dispute_in_arbitration
+          - dispute_amount_changed
+          - dispute_comment_added
+          - evidence_merchant
+          - evidence_customer
+          - evidence_merchant_provided
+          - evidence_customer_provided
+          - merchant_14d_unresponsive
+          - customer_14d_unresponsive
+          example: dispute_created
+          description: "The event type of the dispute history item:\n  - `dispute_created` - the customer raised a dispute;\n  - `dispute_approved` - disputed was approved and amount was refunded to customer;\n  - `dispute_declined` - dispute was declined by Tabby support;\n  - `dispute_canceled` - dispute was canceled by customer;\n  - `dispute_in_arbitration` - merchant challenged dispute (e.g incorrect amount);\n  - `dispute_amount_changed` - disputed amount was changed;\n  - `dispute_comment_added` - merchant added comment to the dispute;\n  - `evidence_merchant` - agent requested evidence from the merchant;\n  - `evidence_customer` - agent requested evidence from the customer;\n  - `evidence_merchant_provided` - merchant provided evidence;\n  - `evidence_customer_provided` - customer provided evidence;\n  - `merchant_14d_unresponsive` - merchant did not respond within 14 days;\n  - `customer_14d_unresponsive` - customer did not respond within 14 days.\n"
+        note:
+          type: string
+          example: additional comments
+          description: Contains additional message provided by merchant while perform action.
+      required:
+      - attachments
+      - created_at
+      - created_by
+      - content
+      - source
+      - event_type
+    PaymentID:
+      type: string
+      format: uuid
+      example: payment id, uuid format
+      readOnly: true
+      description: Unique identifier for the payment (UUID), assigned by Tabby. Save it on your side!
+  responses:
+    Disputes:
+      description: Success. Returns a list of disputes.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              disputes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisputeNoHistory'
+              next_page_token:
+                type: string
+                example: next_page_token
+            required:
+            - disputes
+            - next_page_token
+    Dispute:
+      description: Success. Returns dispute info.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dispute:
+                $ref: '#/components/schemas/Dispute'
+            required:
+            - dispute
+    AuthenticationError_invalid_secret_key:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_invalid_secret_key'
+    NotFoundError:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404'
+    DisputesApprove:
+      description: Success. Disputes were approved.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              disputes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisputeNoHistory'
+    DisputeProvideEvidence:
+      description: Success. Evidence was submitted for the dispute.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Evidence'
+    BadRequestError_bad_request:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_bad_request'
+    UnexpectedError:
+      description: Something bad happened. We're notified.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_500'
+    NotFoundError_Disputes:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404_dispute_not_found'
+    DisputeAttachmentUpload:
+      description: Success. Attachment was uploaded.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: attachment id, uuid format
+                description: Unique ID of attachment
+    DisputesChallenge:
+      description: Success. Disputes were challenged.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              disputes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisputeNoHistory'
+    DisputeProvideEvidenceConflict:
+      description: Conflict. Evidence cannot be submitted for the dispute in its current state.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_409'
+  parameters:
+    disputeIdParam:
+      in: path
+      name: dispute_id
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: dispute id, uuid format
+      description: ID of the dispute.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer authentication header of the form `Bearer <secret_key>`, where `<secret_key>` is your `secret_key`.
+
+        '
+x-tagGroups:
+- name: API
+  tags:
+  - Checkout
+  - Payments
+  - Webhooks
+  - Disputes

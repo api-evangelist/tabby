@@ -1,0 +1,437 @@
+openapi: 3.1.0
+info:
+  title: Tabby API Reference Checkout Webhooks API
+  version: 1.0.0
+  x-logo:
+    url: assets/tabby-new.png
+    altText: tabby Logo
+  description: 'Tabby Documentation:  **[docs.tabby.ai](https://docs.tabby.ai/)**
+
+    '
+servers:
+- url: https://api.tabby.ai/
+  description: Production (UAE, Kuwait)
+- url: https://api.tabby.sa/
+  description: Production (KSA)
+tags:
+- name: Webhooks
+  description: Manage webhook endpoints.
+paths:
+  /api/v1/webhooks:
+    post:
+      tags:
+      - Webhooks
+      summary: Register a webhook
+      description: Creates a new webhook
+      operationId: postWebhook
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/merchantCodeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRegistration'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookRegistration'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_authorization'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    get:
+      tags:
+      - Webhooks
+      summary: Retrieve all webhooks
+      description: Retrieves all registred webhooks.
+      operationId: getWebhooks
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/merchantCodeParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookAll'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_authorization'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/webhooks/{id}:
+    get:
+      tags:
+      - Webhooks
+      summary: Retrieve a webhook
+      description: Retrieves the specified webhook.
+      operationId: getWebhook
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/webhookIdParam'
+      - $ref: '#/components/parameters/merchantCodeParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/Webhook'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_webhook'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    put:
+      tags:
+      - Webhooks
+      summary: Update a webhook
+      description: Updates the specified webhook.
+      operationId: putWebhook
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/webhookIdParam'
+      - $ref: '#/components/parameters/merchantCodeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookUpdate'
+        '400':
+          $ref: '#/components/responses/BadRequestError_bad_request'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_authorization'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_webhook'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    delete:
+      tags:
+      - Webhooks
+      summary: Remove a webhook
+      description: Removes the specified webhook.
+      operationId: deleteWebhook
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/webhookIdParam'
+      - $ref: '#/components/parameters/merchantCodeParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookDelete'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_invalid_secret_key'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_webhook'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+components:
+  schemas:
+    WebhookRegistration:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: https://example.com/
+          description: HTTPS endpoint for notifications. The URL should be valid and accessible (not local).
+        header:
+          type: object
+          properties:
+            title:
+              type: string
+              example: Arbitrary header name to sign the request
+              description: Arbitrary header name to sign the request.
+            value:
+              type: string
+              example: Random string to sign the request
+              description: Random string to sign the request.
+      required:
+      - url
+    Error_401_invalid_secret_key:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: invalid secret key
+    WebhookRegistrationResponse:
+      type: object
+      properties:
+        header:
+          type: object
+          nullable: true
+          properties:
+            title:
+              type: string
+              nullable: true
+              example: Arbitrary header name to sign the request
+              description: Arbitrary header name to sign the request.
+            value:
+              type: string
+              nullable: true
+              example: Random string to sign the request
+              description: Random string to sign the request.
+        id:
+          type: string
+          readOnly: true
+          example: unique webhook id
+          description: Unique webhook ID, assigned by Tabby.
+        is_test:
+          type: boolean
+          default: false
+          description: Indicates whether to use this hook in test environment or not.
+        url:
+          type: string
+          format: uri
+          example: https://example.com/
+          description: HTTPS endpoint for notifications. The URL should be valid and accessible (not local).
+      required:
+      - url
+      - is_test
+    Error_404:
+      type: string
+      example: 404 page not found
+    Error_500:
+      type: string
+      example: Internal Server error
+    Error_401_authorization:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: authorization
+    WebhookUpdate:
+      type: object
+      properties:
+        header:
+          type: object
+          properties:
+            title:
+              type: string
+              example: Arbitrary header name to sign the request
+              description: Arbitrary header name to sign the request.
+            value:
+              type: string
+              example: Random string to sign the request
+              description: Random string to sign the request.
+        id:
+          type: string
+          readOnly: true
+          example: unique webhook id
+          description: Unique webhook ID, assigned by Tabby.
+        url:
+          type: string
+          format: uri
+          example: https://example-updated.com/
+          description: HTTPS endpoint for notifications. The URL should be valid and accessible (not local).
+      required:
+      - url
+      - id
+    Error_403:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: no_permission
+    WebhookResponseAll:
+      oneOf:
+      - $ref: '#/components/schemas/Webhook'
+      - description: If no webhooks are registered - `null` will be returned.
+    Error_404_no_such_webhook:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_found
+        error:
+          type: string
+          example: no such webhook
+    Error_400_bad_request:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: bad_request
+    Webhook:
+      type: object
+      properties:
+        header:
+          type: object
+          nullable: true
+          properties:
+            title:
+              type: string
+              example: Arbitrary header name to sign the request
+              description: Arbitrary header name to sign the request.
+            value:
+              type: string
+              example: Random string to sign the request
+              description: Random string to sign the request.
+        id:
+          type: string
+          readOnly: true
+          example: unique webhook id
+          description: Unique webhook ID, assigned by Tabby.
+        is_test:
+          type: boolean
+          default: true
+          description: Indicates whether to use this hook in test environment or not.
+        url:
+          type: string
+          format: uri
+          example: https://example.com/
+          description: HTTPS endpoint for notifications. The URL should be valid and accessible (not local).
+      required:
+      - url
+      - is_test
+      - id
+    WebhookDelete:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+  responses:
+    NotFoundError_no_such_webhook:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404_no_such_webhook'
+    WebhookDelete:
+      description: Webhook was deleted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookDelete'
+    AuthenticationError_invalid_secret_key:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_invalid_secret_key'
+    AuthenticationError_authorization:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_authorization'
+    NotFoundError:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404'
+    WebhookUpdate:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookUpdate'
+    BadRequestError_bad_request:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_bad_request'
+    UnexpectedError:
+      description: Something bad happened. We're notified.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_500'
+    ForbiddenError:
+      description: You tried to perform an action which is forbidden.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_403'
+    WebhookRegistration:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookRegistrationResponse'
+    Webhook:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Webhook'
+    WebhookAll:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookResponseAll'
+  parameters:
+    merchantCodeParam:
+      in: header
+      name: X-Merchant-Code
+      required: true
+      schema:
+        type: string
+        example: code provided to you from Tabby side
+      description: Used for multi store/countries setup, please contact your Account manager to recognize that
+    webhookIdParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: webhook id, uuid format
+      description: ID of the webhook.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer authentication header of the form `Bearer <secret_key>`, where `<secret_key>` is your `secret_key`.
+
+        '
+x-tagGroups:
+- name: API
+  tags:
+  - Checkout
+  - Payments
+  - Webhooks
+  - Disputes

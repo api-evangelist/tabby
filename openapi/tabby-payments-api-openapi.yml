@@ -1,0 +1,2052 @@
+openapi: 3.1.0
+info:
+  title: Tabby API Reference Checkout Payments API
+  version: 1.0.0
+  x-logo:
+    url: assets/tabby-new.png
+    altText: tabby Logo
+  description: 'Tabby Documentation:  **[docs.tabby.ai](https://docs.tabby.ai/)**
+
+    '
+servers:
+- url: https://api.tabby.ai/
+  description: Production (UAE, Kuwait)
+- url: https://api.tabby.sa/
+  description: Production (KSA)
+tags:
+- name: Payments
+  description: The core of tabby is a payments flow enabling you to handle payments at your webstore.
+paths:
+  /api/v2/payments/{id}:
+    get:
+      tags:
+      - Payments
+      summary: Retrieve a payment
+      description: Retrieves the specified payment. Returns the entire payment object, including the payment Status, Captures and Refunds objects.
+      operationId: getPayment
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/paymentIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_PaymentsGet'
+        '401':
+          $ref: '#/components/responses/AuthenticationError_PaymentsGet'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_payment'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    put:
+      tags:
+      - Payments
+      summary: Update a payment
+      description: Updates the reference_id. You can only use this endpoint to update this 1 field. If you send other fields in the request, they will simply be ignored by tabby. The payment to be updated can have a status of AUTHORIZED or CLOSED.
+      operationId: putPayment
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/paymentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: object
+                  properties:
+                    reference_id:
+                      type: string
+                      description: Merchant-assigned order or cart ID.
+                      example: 1001_updated
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentUpdate'
+        '400':
+          $ref: '#/components/responses/BadRequestError_PaymentsGet'
+        '401':
+          $ref: '#/components/responses/AuthenticationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_payment'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v2/payments/{id}/captures:
+    post:
+      tags:
+      - Payments
+      summary: Capture a payment
+      description: Send a Capture requests for Authorized payments only. If you capture the full payment amount, the payment will be automatically closed with full capture. If you capture partial amount, the payment will remain Authorized until the rest of the amount is captured or Close request sent.
+      operationId: postPaymentCapture
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/paymentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaptureRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCaptureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_PaymentsCapture'
+        '401':
+          $ref: '#/components/responses/AuthenticationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_payment'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v2/payments/{id}/refunds:
+    post:
+      tags:
+      - Payments
+      summary: Refund a payment
+      description: Send a full or partial refund amount request. You can only refund the payment that has Closed status. By default refunds reflect instantly, which means Tabby initiates a refund through payment gateway.
+      operationId: postPaymentRefund
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/paymentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRefundResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_PaymentsRefund'
+        '401':
+          $ref: '#/components/responses/AuthenticationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_payment'
+        '409':
+          $ref: '#/components/responses/PaymentRefundError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v2/payments/{id}/close:
+    post:
+      tags:
+      - Payments
+      summary: Close a payment
+      description: Closed is the final status of the payment. Your payment is going to be closed automatically if you capture the full amount of the payment. If an order is fully cancelled, please close the payment without capturing it - the customer will be refunded for all paid amount. If only a part of the order is delivered, please capture this part and close the payment – it will mean that another part of the order is not going to be delivered to the customer.
+      operationId: closePayment
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - $ref: '#/components/parameters/paymentIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentClose'
+        '400':
+          $ref: '#/components/responses/BadRequestError_PaymentsClose'
+        '401':
+          $ref: '#/components/responses/AuthenticationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError_no_such_payment'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v2/payments:
+    get:
+      tags:
+      - Payments
+      summary: List of all payments
+      description: Returns a list of success payments (`AUTHORIZED` or `CLOSED`) you’ve previously created. The payments are returned in sorted order, with the most recent payments appearing first. Each entry in the array is a separate payments object, including the status, any captures and any refunds. If no more payments are available, the resulting array will be empty. Payments might be filtered by creation date.
+      operationId: getPayments
+      security:
+      - bearerAuth:
+        - secret_key
+      parameters:
+      - in: query
+        name: created_at__gte
+        schema:
+          type: string
+          format: date
+        description: This is a filter for the payment creation date, use it to get the list of payments where creation date >= created_at__gte. ISO 8601 date time format (greater than or equal to). No time should be provided, it starts at 00:00:00 be default. For example 2020-01-23 -> 2020-01-23T00:00:00Z.
+      - in: query
+        name: created_at__lte
+        schema:
+          type: string
+          format: date-time
+        description: This is a filter for the payment creation date, use it to get the list of payments where creation date <= created_at__lte. ISO 8601 date time format (less than or equal to). No time should be provided, it starts at 00:00:00 be default. For example 2020-01-23 -> 2020-01-23T00:00:00Z.
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          maximum: 20
+        description: Limits the number of returned results.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - authorized
+          - closed
+          - rejected
+          - new
+          - captured
+          - refunded
+          - cancelled
+          example: authorized
+        description: "Filter the orders by specific statuses:\n  - `authorized`, `closed` and `rejected` belong to the API payment statuses;\n  - `new`, `captured`, `refunded` and `cancelled`` refer to the statuses on Tabby Merchant Dashboard;\n  - If absent, all `AUTHORIZED` and `CLOSED` payments are returned.\n"
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: The number of records into a dataset that you want to start, indexed at 0.
+      responses:
+        '200':
+          $ref: '#/components/responses/Payments'
+        '400':
+          $ref: '#/components/responses/BadRequestError_failed'
+        '401':
+          $ref: '#/components/responses/AuthenticationError'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+components:
+  schemas:
+    FlightPointsSimple:
+      type: object
+      required:
+      - origin
+      - destination
+      properties:
+        origin:
+          description: Origin city and airport
+          type: object
+          required:
+          - air_code
+          - city_code
+          properties:
+            air_code:
+              type: string
+              example: JFK
+              description: Origin IATA airport code, for example - JFK
+            city_code:
+              type: string
+              example: NYC
+              description: Origin city code, for example - NYC
+        destination:
+          description: Destination city and airport
+          type: object
+          required:
+          - air_code
+          - city_code
+          properties:
+            air_code:
+              type: string
+              example: LAX
+              description: Destination IATA airport code, for example - LAX
+            city_code:
+              type: string
+              example: LAX
+              description: Destination city code, for example - LAX
+    EducationDetails:
+      type: object
+      description: Education-vertical risk signals for the current session.
+      properties:
+        merchant_subtype:
+          type: string
+          enum:
+          - formal_education
+          - courses_training
+          example: formal_education
+          description: Duplicated from onboarding config for self-check.
+        program:
+          type: object
+          description: Details of the education program being paid for.
+          properties:
+            payment_tenure_months:
+              type: integer
+              example: 6
+              description: Total payment plan tenure in months.
+            months_to_completion:
+              type: integer
+              example: 9
+              description: Months remaining until program completion / graduation.
+          required:
+          - payment_tenure_months
+          - months_to_completion
+        student_history:
+          type: object
+          description: Student's payment history with the merchant.
+          properties:
+            late_payments_count:
+              type: integer
+              example: 2
+              description: Total count of late payments by the student across history.
+            avg_overdue_duration_days:
+              type: number
+              example: 4.5
+              description: Average overdue duration in days.
+            observation_window_months:
+              type: integer
+              example: 12
+              description: Window over which history was calculated, to distinguish a new student's 0 late payments from a long-history clean student's 0.
+          required:
+          - late_payments_count
+          - avg_overdue_duration_days
+      required:
+      - merchant_subtype
+      - program
+      - student_history
+    OrderItem:
+      type: object
+      properties:
+        reference_id:
+          type: string
+          example: SKU123
+          description: Merchant’s product identifier. Displayed in Customer's App and Merchant Dashboard, used for Item refunds and disputes.
+        title:
+          type: string
+          example: Name of the product
+          description: Name of the product.
+        description:
+          type: string
+          example: Description of the product
+          description: Description of the product.
+        quantity:
+          type: integer
+          default: 1
+          minimum: 1
+          example: 1
+          description: Quantity of the product ordered.
+        unit_price:
+          type: string
+          default: '0.00'
+          example: '0.00'
+          description: Price per unit of the product. Should be positive or zero.
+        discount_amount:
+          type: string
+          default: '0.00'
+          example: '0.00'
+          description: Amount of the applied discount if any. Should be positive or zero.
+        image_url:
+          type: string
+          format: uri
+          example: https://example.com/
+          description: URL of the item image to show in the order information.
+        product_url:
+          type: string
+          format: uri
+          example: https://example.com/
+          description: URL of the item at your store.
+        gender:
+          type: string
+          enum:
+          - Male
+          - Female
+          - Kids
+          - Other
+          example: Kids
+          description: Who the goods are designed to.
+        category:
+          type: string
+          example: Clothes
+          description: Required as name of high-level category (Clothes, Electronics,etc.); or a tree of category-subcategory1-subcategory2; or id of the category and table with category-ids data mapped provided.
+        color:
+          type: string
+          example: white
+          description: white / blue/ green
+        product_material:
+          type: string
+          example: cotton
+          description: cotton / polyester / synthetic
+        size_type:
+          type: string
+          example: EU
+          description: EU / UK
+        size:
+          type: string
+          example: M
+          description: L / XL / 12
+        brand:
+          type: string
+          example: Name of the Brand
+          description: Mango / Dorothy Perkins / Tommy Hilfiger
+        is_refundable:
+          type: boolean
+          description: Indicates whether a product can be returned
+        barcode:
+          type: string
+          example: '12345678'
+          description: A machine-readable product identifier. Typically used for logistics and scanning.
+        ppn:
+          type: string
+          example: MNXT2ZM/A
+          description: Product Part Number assigned by the manufacturer. Used to identify specific components or versions of a product.
+        seller:
+          type: string
+          example: Name of the Seller
+          description: The name of the seller offering this item. This field is used to distinguish products from different vendors on a single marketplace.
+      required:
+      - title
+      - quantity
+      - unit_price
+      - category
+    PaymentCaptureResponse:
+      description: Payment object.
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PaymentID'
+        created_at:
+          $ref: '#/components/schemas/PaymentCreatedAt'
+        expires_at:
+          $ref: '#/components/schemas/PaymentExpiresAt'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        is_test:
+          readOnly: true
+          type: boolean
+          description: Indicates whether this is a test payment (created using the Test API keys or Production API Keys).
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        description:
+          type: string
+          nullable: true
+          example: description
+        buyer:
+          $ref: '#/components/schemas/BuyerResponse'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddressResponse'
+        order:
+          $ref: '#/components/schemas/OrderResponse'
+        captures:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CaptureResponse'
+        refunds:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            type: object
+          default: []
+        buyer_history:
+          $ref: '#/components/schemas/BuyerHistoryResponse'
+        order_history:
+          type: array
+          nullable: true
+          description: Array of objects, should contain information on 5-10 previously placed via any payment method orders in any status, current order excluded.
+          items:
+            $ref: '#/components/schemas/OrderHistoryResponse'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        attachment:
+          $ref: '#/components/schemas/Attachment_V1'
+      required:
+      - amount
+      - currency
+      - buyer
+      - order
+      - buyer_history
+      - order_history
+      - shipping_address
+    OrderItemHistoryResponse:
+      type: object
+      properties:
+        reference_id:
+          type: string
+          nullable: true
+          example: SKU123
+          description: Merchant’s product identifier. Displayed in Customer's App and Merchant Dashboard, used for Item refunds and disputes.
+        title:
+          type: string
+          nullable: true
+          example: Name of the product
+          description: Name of the product.
+        description:
+          type: string
+          nullable: true
+          example: Description of the product
+          description: Description of the product.
+        quantity:
+          type: integer
+          default: 1
+          minimum: 0
+          example: 1
+          description: Quantity of the product ordered.
+        unit_price:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Price per unit of the product. Should be positive or zero.
+        image_url:
+          type: string
+          nullable: true
+          format: uri
+          example: https://example.com/
+          description: URL of the item image to show in the order information.
+        product_url:
+          type: string
+          nullable: true
+          format: uri
+          example: https://example.com/
+          description: URL of the item at your store.
+        gender:
+          type: string
+          nullable: true
+          enum:
+          - Male
+          - Female
+          - Kids
+          - Other
+          example: Kids
+          description: Who the goods are designed to.
+        category:
+          type: string
+          nullable: true
+          example: Clothes
+          description: Required as name of high-level category (Clothes, Electronics,etc.); or a tree of category-subcategory1-subcategory2; or id of the category and table with category-ids data mapped provided.
+        color:
+          type: string
+          nullable: true
+          example: white
+          description: white / blue/ green
+        product_material:
+          type: string
+          nullable: true
+          example: cotton
+          description: cotton / polyester / synthetic
+        size_type:
+          type: string
+          nullable: true
+          example: EU
+          description: EU / UK
+        size:
+          type: string
+          nullable: true
+          example: M
+          description: L / XL / 12
+        brand:
+          type: string
+          nullable: true
+          example: Name of the Brand
+          description: Mango / Dorothy Perkins / Tommy Hilfiger
+        is_refundable:
+          type: boolean
+          nullable: true
+          description: Indicates whether a product can be returned
+        ordered:
+          type: integer
+          default: 0
+          description: Quantity of SKUs in the order without a final status yet.
+        captured:
+          type: integer
+          default: 0
+          description: Quantity of captured SKUs in the order (paid by customer).
+        shipped:
+          type: integer
+          default: 0
+          description: Quantity of SKUs in the order shipped to the customer.
+        refunded:
+          type: integer
+          default: 0
+          description: Quantity of SKUs in the order refunded to the customer.
+      required:
+      - title
+      - quantity
+      - unit_price
+      - category
+    PaymentUpdate:
+      description: Payment object.
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PaymentID'
+        created_at:
+          $ref: '#/components/schemas/PaymentCreatedAt'
+        expires_at:
+          $ref: '#/components/schemas/PaymentExpiresAt'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        is_test:
+          readOnly: true
+          type: boolean
+          description: Indicates whether this is a test payment (created using the Test API keys or Production API Keys).
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        description:
+          type: string
+          nullable: true
+          example: description
+        buyer:
+          $ref: '#/components/schemas/BuyerResponse'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddressResponse'
+        order:
+          $ref: '#/components/schemas/OrderPaymentUpdate'
+        captures:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CaptureResponse'
+        refunds:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/RefundResponse'
+        buyer_history:
+          $ref: '#/components/schemas/BuyerHistoryResponse'
+        order_history:
+          type: array
+          nullable: true
+          description: Array of objects, should contain information on 5-10 previously placed via any payment method orders in any status, current order excluded.
+          items:
+            $ref: '#/components/schemas/OrderHistoryResponse'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        attachment:
+          $ref: '#/components/schemas/Attachment_V1'
+      required:
+      - amount
+      - currency
+      - buyer
+      - order
+      - buyer_history
+      - order_history
+      - shipping_address
+    PaymentAmountResponse:
+      type: string
+      nullable: true
+      example: '100'
+      description: Total payment amount, including tax, shipping and any discounts. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+    Attachment_V1:
+      type: object
+      nullable: true
+      description: Extra data (booking info, insurance, flight reservations, ...) as serialized JSON
+      properties:
+        body:
+          description: Should be an object containing any of the keys with corresponded sub objects
+          example: '{"flight_reservation_details": {"pnr": "TR9088999","itinerary": [...],"insurance": [...],"passengers": [...],"affiliate_name": "some affiliate"}}'
+          properties:
+            flight_reservation_details:
+              $ref: '#/components/schemas/FlightReservationDetails'
+            hotel_reservation_details:
+              $ref: '#/components/schemas/HotelReservationDetails'
+            insurance_details:
+              $ref: '#/components/schemas/InsuranceDetails'
+            payment_history_full:
+              $ref: '#/components/schemas/AttachmentPaymentHistoryFull'
+            payment_history_simple:
+              $ref: '#/components/schemas/AttachmentPaymentHistorySimple'
+            flight_points_simple:
+              $ref: '#/components/schemas/FlightPointsSimple'
+            marketplaces:
+              $ref: '#/components/schemas/Marketplaces'
+            education_details:
+              $ref: '#/components/schemas/EducationDetails'
+        content_type:
+          description: Version of used schema
+          type: string
+          default: application/vnd.tabby.v1+json
+      required:
+      - body
+      - content_type
+    Meta:
+      description: Merchant-defined data about the payment. This field is a key-value map. The example properties provided below.
+      type: object
+      nullable: true
+      properties:
+        customer:
+          type: string
+          nullable: true
+          example: '#customer-id'
+        order_id:
+          type: string
+          nullable: true
+          example: '#1234'
+    PaymentAmount:
+      type: string
+      example: '100'
+      description: Total payment amount, including tax, shipping and any discounts. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+    HotelReservationDetails:
+      type: object
+      required:
+      - hotel_itinerary
+      - insurance
+      - passengers
+      properties:
+        pnr:
+          type: string
+          example: TR9088999
+          description: Trip booking number, e.g. TR9088999
+        hotel_itinerary:
+          description: Hotel itinerary data, one per segment
+          type: array
+          items:
+            type: object
+            properties:
+              hotel_name:
+                type: string
+                example: hotel_name
+              address:
+                type: string
+                example: address
+              hotel_city:
+                type: string
+                example: hotel_city
+              hotel_country:
+                type: string
+                example: hotel_country
+              start_date:
+                description: ISO 8601 date e.g. 2018-10-17
+                type: string
+                format: date
+                pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+              end_date:
+                description: ISO 8601 date e.g. 2018-10-17
+                type: string
+                format: date
+                pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+              number_of_rooms:
+                type: integer
+                example: 1
+              class:
+                type: string
+                example: class
+        insurance:
+          description: Insurance data
+          type: array
+          items:
+            type: object
+            properties:
+              insurance_company:
+                type: string
+                example: insurance_company
+              insurance_type:
+                type: string
+                example: insurance_type
+              insurance_price:
+                type: number
+                example: insurance_price
+        passengers:
+          description: Passengers data
+          type: array
+          items:
+            type: object
+            properties:
+              full_name:
+                type: string
+                example: full_name
+              first_name:
+                type: string
+                example: first_name
+              last_name:
+                type: string
+                example: last_name
+              dob:
+                description: ISO 8601 date of birth, e.g. 2018-10-17
+                type: string
+                example: 2018-10-17 00:00:00+00:00
+              document_type:
+                type: string
+                example: document_type
+              document_id:
+                type: string
+                example: document_id
+              expiration_id_dt:
+                description: ISO 8601 date e.g. 2018-10-17
+                type: string
+                format: date
+                pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+              nationality:
+                type: string
+                example: nationality
+              gender:
+                description: F - female, M - male, O - other
+                type: string
+                enum:
+                - F
+                - M
+                - O
+                example: M
+        affiliate_name:
+          description: Name of the affiliate that originated the purchase. If none, leave blank.
+          type: string
+          example: Name of the affiliate that originated the purchase. If none, leave blank.
+    Currency:
+      type: string
+      enum:
+      - AED
+      - SAR
+      - KWD
+      example: AED
+      description: "ISO 4217 currency code for the payment amount. Currently there are 3 possible currency options - depending on the country where the store is located:\n  - `AED` - United Arab Emirates Dirham\n  - `SAR` - Saudi Riyal\n  - `KWD` - Kuwaiti Dinar\n"
+    RefundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: refund id, uuid format
+          readOnly: true
+          description: Unique refund ID, assigned by Tabby.
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time the refund was created, in UTC, and displayed in ISO 8601 datetime format, assigned by Tabby.
+        amount:
+          type: string
+          default: '0.00'
+          description: Amount refunded. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+        reason:
+          type: string
+          nullable: true
+          example: Reason for the refund
+          description: Reason for the refund.
+        items:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          description: Array of objects representing the order items being refunded.
+        reference_id:
+          type: string
+          nullable: true
+          example: refund idempotency key
+          description: Idempotency key. Used to avoid similar refund requests.
+      required:
+      - amount
+      - reference_id
+    Error_401_missingBearer:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: missing Bearer scheme
+    OrderPaymentUpdate:
+      type: object
+      nullable: true
+      properties:
+        reference_id:
+          type: string
+          nullable: true
+          example: 1001_updated
+          description: Merchant-assigned order number.
+        updated_at:
+          type: string
+          format: date-time
+          description: Date and time the order was last updated, in UTC, and displayed in ISO 8601 datetime format.
+        tax_amount:
+          type: string
+          default: '0.00'
+          description: Total tax for the order.
+        shipping_amount:
+          type: string
+          default: '0.00'
+          description: Total shipping cost for the order.
+        discount_amount:
+          type: string
+          default: '0.00'
+          description: Total discount for the order. Should be positive or zero. Shows up on Tabby App for the Customer's convenience.
+        items:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          description: Array of objects representing the order items in this payment.
+      required:
+      - items
+      - reference_id
+    BuyerResponse:
+      description: Customer information
+      type: object
+      nullable: true
+      properties:
+        name:
+          type: string
+          nullable: true
+          example: John Doe
+          description: Customer’s full name.
+        email:
+          type: string
+          nullable: true
+          format: email
+          description: Customer’s email address.
+        phone:
+          type: string
+          nullable: true
+          example: '500000001'
+          description: Customer’s phone number. This must be a valid mobile phone where the consumer can receive text messages. The accepted phone masks are - `500000001`, `0500000001`, `+971500000001`, `971500000001`.
+        dob:
+          type: string
+          nullable: true
+          format: date
+          example: '2000-01-20'
+          description: Customer's date of birth; format is YYYY-MM-DD.
+      required:
+      - phone
+      - email
+      - name
+    InsuranceDetails:
+      type: object
+      required:
+      - policy_details
+      - client
+      properties:
+        policy_details:
+          description: Information about insurance
+          type: object
+          required:
+          - insurance_type
+          - insurance_start_dt
+          - insurance_end_dt
+          - insured_amount
+          properties:
+            insurance_type:
+              description: Insurance policy type
+              type: string
+              example: Insurance policy type
+            insurance_start_dt:
+              description: ISO 8601 start date, e.g. 2018-10-17
+              type: string
+              example: 2018-10-17 00:00:00+00:00
+            insurance_end_dt:
+              description: ISO 8601 end date, e.g. 2018-10-17
+              type: string
+              example: 2018-10-17 00:00:00+00:00
+            insured_amount:
+              description: Amount of insurance policy
+              type: string
+              example: '100'
+            car_details:
+              description: Required for car insurance
+              type: object
+              required:
+              - manufacturer
+              - model
+              - year
+              properties:
+                manufacturer:
+                  type: string
+                  example: manufacturer
+                model:
+                  type: string
+                  example: model
+                year:
+                  type: string
+                  example: year
+            travel_details:
+              description: Required for travel insurance
+              type: object
+              required:
+              - departure_country
+              - arrival_country
+              properties:
+                departure_country:
+                  type: string
+                  example: departure_country
+                arrival_country:
+                  type: string
+                  example: arrival_country
+            refundable:
+              description: If insurance can be cancelled/refunded - true, otherwise - false
+              type: boolean
+            provider_name:
+              type: string
+              example: provider_name
+        client:
+          type: object
+          required:
+          - first_name
+          - last_name
+          - document_type
+          properties:
+            full_name:
+              type: string
+              example: full_name
+            first_name:
+              type: string
+              example: first_name
+            last_name:
+              type: string
+              example: last_name
+            dob:
+              description: ISO 8601 date of birth, e.g. 2018-10-17
+              type: string
+              example: 2018-10-17 00:00:00+00:00
+            document_type:
+              type: string
+              example: document_type
+            document_id:
+              type: string
+              example: document_id
+            expiration_id_dt:
+              description: ISO 8601 date e.g. 2018-10-17
+              type: string
+              format: date
+              pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+            nationality:
+              type: string
+              example: nationality
+            gender:
+              description: F - female, M - male, O - other
+              example: F
+        payment_history_simple:
+          type: object
+          required:
+          - date_of_last_paid_purchase
+          - date_of_first_paid_purchase
+          properties:
+            unique_account_identifier:
+              type: string
+              example: unique name / id of the customer
+              description: Unique name / number to identify the specific customer account
+            paid_before_flag:
+              type: boolean
+              description: Whether the customer has paid before or not
+            date_of_last_paid_purchase:
+              description: ISO 8601 date e.g. 2018-10-17
+              type: string
+              format: date
+              pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+            date_of_first_paid_purchase:
+              description: ISO 8601 date e.g. 2018-10-17
+              type: string
+              format: date
+              pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+    AttachmentPaymentHistoryFull:
+      type: object
+      properties:
+        unique_account_identifier:
+          type: string
+          example: unique name / id of the customer
+          description: Unique name / number to identify the specific customer account
+        payment_option:
+          description: One of - card / direct banking / COD (cash) / other
+          type: string
+          enum:
+          - card
+          - direct banking
+          - cod
+          - other
+          example: card
+        number_paid_purchases:
+          type: number
+          example: 1
+        total_amount_paid_purchases:
+          type: number
+          example: 1
+        date_of_last_paid_purchase:
+          description: ISO 8601 date e.g. 2018-10-17
+          type: string
+          format: date
+          pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+        date_of_first_paid_purchase:
+          description: ISO 8601 date e.g. 2018-10-17
+          type: string
+          format: date
+          pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+        count_paid_purchases_last_month:
+          type: number
+          example: 1
+        amount_paid_purchases_last_month:
+          type: number
+          example: 1
+        max_paid_amount_for_1purchase:
+          type: number
+          example: 1
+    Error_500:
+      type: string
+      example: Internal Server error
+    OrderItemResponse:
+      type: object
+      properties:
+        reference_id:
+          type: string
+          nullable: true
+          example: SKU123
+          description: Merchant’s product identifier. Displayed in Customer's App and Merchant Dashboard, used for Item refunds and disputes.
+        title:
+          type: string
+          nullable: true
+          example: Name of the product
+          description: Name of the product.
+        description:
+          type: string
+          nullable: true
+          example: Description of the product
+          description: Description of the product.
+        quantity:
+          type: integer
+          default: 0
+          minimum: 0
+          example: 1
+          description: Quantity of the product ordered.
+        unit_price:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Price per unit of the product. Should be positive or zero.
+        image_url:
+          type: string
+          nullable: true
+          format: uri
+          example: https://example.com/
+          description: URL of the item image to show in the order information.
+        product_url:
+          type: string
+          nullable: true
+          format: uri
+          example: https://example.com/
+          description: URL of the item at your store.
+        gender:
+          type: string
+          nullable: true
+          enum:
+          - Male
+          - Female
+          - Kids
+          - Other
+          example: Kids
+          description: Who the goods are designed to.
+        category:
+          type: string
+          nullable: true
+          example: Clothes
+          description: Required as name of high-level category (Clothes, Electronics,etc.); or a tree of category-subcategory1-subcategory2; or id of the category and table with category-ids data mapped provided.
+        color:
+          type: string
+          nullable: true
+          example: white
+          description: white / blue/ green
+        product_material:
+          type: string
+          nullable: true
+          example: cotton
+          description: cotton / polyester / synthetic
+        size_type:
+          type: string
+          nullable: true
+          example: EU
+          description: EU / UK
+        size:
+          type: string
+          nullable: true
+          example: M
+          description: L / XL / 12
+        brand:
+          type: string
+          nullable: true
+          example: Name of the Brand
+          description: Mango / Dorothy Perkins / Tommy Hilfiger
+        is_refundable:
+          type: boolean
+          nullable: true
+          description: Indicates whether a product can be returned
+      required:
+      - title
+      - quantity
+      - unit_price
+      - category
+    Marketplaces:
+      type: object
+      description: Sellers' details within marketplaces.
+      properties:
+        seller_id:
+          type: string
+          example: '57327813'
+          description: Unique ID of the seller within your marketplace.
+        seller_name:
+          type: string
+          example: Pet Shop
+          description: Name of the seller within your marketplace.
+        seller_category:
+          type: string
+          example: Electronics
+          description: Category of the seller within your marketplace.
+        seller_website:
+          type: string
+          example: https://www.petshop.com
+          description: Website of the seller within your marketplace.
+        seller_phone:
+          type: string
+          example: '500000001'
+          description: Seller's phone number.
+        seller_registration_date:
+          type: string
+          format: date-time
+          description: Seller's registration date, in UTC, and displayed in ISO 8601 datetime format.
+        seller_commercial_registration_number:
+          type: string
+          example: '1012345678'
+          description: Seller's commercial registration number.
+      required:
+      - seller_id
+      - seller_name
+      - seller_category
+      - seller_website
+      - seller_phone
+      - seller_registration_date
+      - seller_commercial_registration_number
+    RefundRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          default: '0.00'
+          description: Amount refunded. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+        reference_id:
+          type: string
+          example: refund idempotency key
+          description: Idempotency key. Used to avoid similar refund requests.
+        reason:
+          type: string
+          example: Reason for the refund
+          description: Reason for the refund.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          description: Array of objects representing the order items being refunded.
+      required:
+      - amount
+      - reference_id
+    CaptureResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: capture id, uuid format
+          readOnly: true
+          description: Unique capture ID, assigned by Tabby.
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time the capture was created, in UTC, and displayed in ISO 8601 datetime format, assigned by Tabby.
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+          description: Total payment amount captured, including tax, shipping, and excluding any discounts. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+        tax_amount:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Tax amount captured.
+        shipping_amount:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Shipping cost captured.
+        discount_amount:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Total discount for the order. Should be positive or zero.
+        items:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          description: Array of objects representing the order items being captured.
+        reference_id:
+          type: string
+          nullable: true
+          example: capture idempotency key
+          description: Idempotency key. Used to avoid similar capture requests.
+      required:
+      - amount
+      - reference_id
+    OrderHistoryResponse:
+      type: object
+      properties:
+        purchased_at:
+          type: string
+          nullable: true
+          format: date-time
+          description: Date and time the order was placed, in UTC, and displayed in ISO 8601 datetime format.
+        amount:
+          $ref: '#/components/schemas/PaymentAmountResponse'
+          description: Total payment amount, including tax, shipping, and excluding any discounts. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+        payment_method:
+          type: string
+          nullable: true
+          enum:
+          - card
+          - cod
+          example: card
+          description: Payment method used.
+        status:
+          type: string
+          nullable: true
+          enum:
+          - new
+          - processing
+          - complete
+          - refunded
+          - canceled
+          - unknown
+          description: Status of the order.
+        buyer:
+          $ref: '#/components/schemas/BuyerResponse'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddressResponse'
+        items:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/OrderItemHistoryResponse'
+          description: Array of objects representing the order items in this payment. If you want to offer consumers a discount, use this object to create a “discount order item”, with the unit_price set to the negative value of the discount.
+      required:
+      - purchased_at
+      - amount
+      - status
+      - buyer
+      - shipping_address
+    Error_400_PaymentsGet:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: invalid payment id
+    PaymentResponse:
+      description: Payment object.
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PaymentID'
+        created_at:
+          $ref: '#/components/schemas/PaymentCreatedAt'
+        expires_at:
+          $ref: '#/components/schemas/PaymentExpiresAt'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        is_test:
+          readOnly: true
+          type: boolean
+          description: Indicates whether this is a test payment (created using the Test API keys or Production API Keys).
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        description:
+          type: string
+          nullable: true
+          example: description
+        buyer:
+          $ref: '#/components/schemas/BuyerResponse'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddressResponse'
+        order:
+          $ref: '#/components/schemas/OrderResponse'
+        captures:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CaptureResponse'
+        refunds:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/RefundResponse'
+        buyer_history:
+          $ref: '#/components/schemas/BuyerHistoryResponse'
+        order_history:
+          type: array
+          nullable: true
+          description: Array of objects, should contain information on 5-10 previously placed via any payment method orders in any status, current order excluded.
+          items:
+            $ref: '#/components/schemas/OrderHistoryResponse'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        attachment:
+          $ref: '#/components/schemas/Attachment_V1'
+      required:
+      - amount
+      - currency
+      - buyer
+      - order
+      - buyer_history
+      - order_history
+      - shipping_address
+    Error_404_no_such_payment:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_found
+        error:
+          type: string
+          example: no such payment
+    PaymentClose:
+      description: Payment object.
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PaymentID'
+        created_at:
+          $ref: '#/components/schemas/PaymentCreatedAt'
+        expires_at:
+          $ref: '#/components/schemas/PaymentExpiresAt'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        is_test:
+          readOnly: true
+          type: boolean
+          description: Indicates whether this is a test payment (created using the Test API keys or Production API Keys).
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        description:
+          type: string
+          nullable: true
+          example: description
+        buyer:
+          $ref: '#/components/schemas/BuyerResponse'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddressResponse'
+        order:
+          $ref: '#/components/schemas/OrderResponse'
+        captures:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CaptureResponse'
+          default: []
+        refunds:
+          type: array
+          nullable: true
+          readOnly: true
+          items:
+            type: object
+          default: []
+        buyer_history:
+          $ref: '#/components/schemas/BuyerHistoryResponse'
+        order_history:
+          type: array
+          nullable: true
+          description: Array of objects, should contain information on 5-10 previously placed via any payment method orders in any status, current order excluded.
+          items:
+            $ref: '#/components/schemas/OrderHistoryResponse'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        attachment:
+          $ref: '#/components/schemas/Attachment_V1'
+      required:
+      - amount
+      - currency
+      - buyer
+      - order
+      - buyer_history
+      - order_history
+      - shipping_address
+    Error_400_PaymentsRefund:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: can not refund payment that has no captures and not closed
+    FlightReservationDetails:
+      type: object
+      required:
+      - itinerary
+      - insurance
+      - passengers
+      properties:
+        pnr:
+          type: string
+          example: Trip booking number, e.g. TR9088999
+          description: Trip booking number, e.g. TR9088999
+        itinerary:
+          description: Itinerary data, one per segment
+          type: array
+          items:
+            type: object
+            properties:
+              departure_city:
+                type: string
+                example: departure_city
+              departure_country:
+                type: string
+                example: departure_country
+              arrival_city:
+                type: string
+                example: arrival_city
+              arrival_country:
+                type: string
+                example: arrival_country
+              carrier:
+                type: string
+                example: carrier
+              departure_date:
+                description: RFC3339 e.g. 2018-10-17T07:26:33Z
+                type: string
+                format: date-time
+                pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]Z$
+              class:
+                type: string
+                example: class
+              refundable:
+                description: true - if ticket can be cancelled/refunded
+                type: boolean
+        insurance:
+          description: Insurance data
+          type: array
+          items:
+            type: object
+            properties:
+              insurance_company:
+                type: string
+                example: insurance_company
+              insurance_type:
+                type: string
+                example: insurance_type
+              insurance_price:
+                type: number
+                example: insurance_price
+        passengers:
+          description: Passengers data
+          type: array
+          items:
+            type: object
+            properties:
+              full_name:
+                type: string
+                example: full_name
+              first_name:
+                type: string
+                example: first_name
+              last_name:
+                type: string
+                example: last_name
+              dob:
+                description: ISO 8601 date of birth, e.g. 2018-10-17
+                type: string
+                example: 2018-10-17 00:00:00+00:00
+              document_type:
+                type: string
+                example: document_type
+              document_id:
+                type: string
+                example: document_id
+              expiration_id_date:
+                description: ISO 8601 date e.g. 2018-10-17
+                type: string
+                format: date
+                pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+              nationality:
+                type: string
+                example: nationality
+              gender:
+                description: F - female, M - male, O - other
+                type: string
+                enum:
+                - F
+                - M
+                - O
+                example: F
+        affiliate_name:
+          description: Name of the affiliate that originated the purchase. If none, leave blank.
+          type: string
+          example: Name of the affiliate that originated the purchase. If none, leave blank.
+    Error_403:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: no_permission
+    Error_400_PaymentsClose:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: already closed
+    PaymentCreatedAt:
+      type: string
+      readOnly: true
+      format: date-time
+      description: Date and time the payment was created, in UTC, and displayed in ISO 8601 datetime format.
+    Error_400_PaymentsCapture:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: could not capture not authorized payments
+    CaptureRequest:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+          description: Total payment amount captured, including tax, shipping, and excluding any discounts. Allows to send up to 2 decimals for AED and SAR, up to 3 decimals for KWD.
+        reference_id:
+          type: string
+          default: string
+          example: capture idempotency key
+          description: Idempotency key. Used to avoid similar capture requests.
+        tax_amount:
+          type: string
+          default: '0.00'
+          description: Tax amount captured.
+        shipping_amount:
+          type: string
+          default: '0.00'
+          description: Shipping cost captured.
+        discount_amount:
+          type: string
+          default: '0.00'
+          description: Total discount for the order. Should be positive or zero.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          description: Array of objects representing the order items being captured.
+      required:
+      - amount
+      - reference_id
+    AttachmentPaymentHistorySimple:
+      type: object
+      properties:
+        unique_account_identifier:
+          type: string
+          example: unique name / id of the customer
+          description: Unique name / number to identify the specific customer account
+        paid_before_flag:
+          type: boolean
+          description: Whether the customer has paid before or not
+        date_of_last_paid_purchase:
+          description: ISO 8601 date e.g. 2018-10-17
+          type: string
+          format: date
+          pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+        date_of_first_paid_purchase:
+          description: ISO 8601 date e.g. 2018-10-17
+          type: string
+          format: date
+          pattern: ^2[0-9]{3}-[0-1][0-9]-[0-3][0-9]$
+    Error_401:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+    Error_400_failed:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: failed to decode request
+    ShippingAddressResponse:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: Dubai
+          description: Name of city, municipality, or village.
+        address:
+          type: string
+          nullable: true
+          example: Dubai
+          description: Building name, apartment number.
+        zip:
+          type: string
+          nullable: true
+          example: '1111'
+          description: Postal code.
+      required:
+      - city
+      - address
+      - zip
+    PaymentRefundResponse:
+      description: Payment object.
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PaymentID'
+        created_at:
+          $ref: '#/components/schemas/PaymentCreatedAt'
+        expires_at:
+          $ref: '#/components/schemas/PaymentExpiresAt'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        is_test:
+          readOnly: true
+          type: boolean
+          description: Indicates whether this is a test payment (created using the Test API keys or Production API Keys).
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        description:
+          type: string
+          nullable: true
+          example: description
+        buyer:
+          $ref: '#/components/schemas/BuyerResponse'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddressResponse'
+        order:
+          $ref: '#/components/schemas/OrderResponse'
+        captures:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CaptureResponse'
+        refunds:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/RefundResponse'
+        buyer_history:
+          $ref: '#/components/schemas/BuyerHistoryResponse'
+        order_history:
+          type: array
+          nullable: true
+          description: Array of objects, should contain information on 5-10 previously placed via any payment method orders in any status, current order excluded.
+          items:
+            $ref: '#/components/schemas/OrderHistoryResponse'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        attachment:
+          $ref: '#/components/schemas/Attachment_V1'
+      required:
+      - amount
+      - currency
+      - buyer
+      - order
+      - buyer_history
+      - order_history
+      - shipping_address
+    Error_409:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: conflict
+        error:
+          type: string
+          example: payment is disputed
+    PaymentExpiresAt:
+      type: string
+      readOnly: true
+      format: date-time
+      description: Date and time the payment expires, in UTC, and displayed in ISO 8601 datetime format.
+    PaymentID:
+      type: string
+      format: uuid
+      example: payment id, uuid format
+      readOnly: true
+      description: Unique identifier for the payment (UUID), assigned by Tabby. Save it on your side!
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+          example: 20
+          description: Limits the number of returned results.
+        offset:
+          type: integer
+          example: 0
+          description: Offset from which start returned results.
+        total_count:
+          type: integer
+          example: 100
+          description: Returned total item count.
+    PaymentStatus:
+      type: string
+      readOnly: true
+      enum:
+      - CREATED
+      - AUTHORIZED
+      - CLOSED
+      - REJECTED
+      - EXPIRED
+      example: CLOSED
+      description: 'Status of the current payment:
+
+        - `CREATED` means that the payment is created successfully, but not finished yet;
+
+        - `AUTHORIZED` and `CLOSED` mark the successfully approved and captured payments accordingly;
+
+        - `REJECTED` is returned when a customer is rejected during Tabby Checkout;
+
+        - `EXPIRED` is used when a customer cancels a payment or when Tabby doesn''t receive a successfully paid transaction after timeout.
+
+        '
+    BuyerHistoryResponse:
+      description: Customer information. `registered_since` (as a date of the customer's registration in the App), `loyalty_level` (as a number of successful orders) and `wishlist_count` (paid amount by a customer previously, e.g. 500) must be sent for Monthly Billing. `is_social_networks_connected` is also required for Monthly Billing.
+      type: object
+      properties:
+        registered_since:
+          type: string
+          format: date-time
+          description: Date and time the customer got registred with you, in UTC, and displayed in ISO 8601 datetime format.
+        loyalty_level:
+          type: number
+          default: 0
+          description: Customer's loyalty level within your store, should be sent as a number of successfully placed orders in the store with any payment methods.
+        wishlist_count:
+          type: number
+          default: 0
+          minimum: 0
+          description: Number of items in Customer's wishlist.
+        is_social_networks_connected:
+          type: boolean
+          nullable: true
+          description: Is social network connected
+        is_phone_number_verified:
+          type: boolean
+          nullable: true
+          description: Is phone number verified
+        is_email_verified:
+          type: boolean
+          nullable: true
+          description: Is email verified
+      required:
+      - registered_since
+      - loyalty_level
+    OrderResponse:
+      type: object
+      nullable: true
+      properties:
+        reference_id:
+          type: string
+          nullable: true
+          example: '1001'
+          description: Merchant-assigned order number.
+        updated_at:
+          type: string
+          format: date-time
+          description: Date and time the order was last updated, in UTC, and displayed in ISO 8601 datetime format.
+        tax_amount:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Total tax for the order.
+        shipping_amount:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Total shipping cost for the order.
+        discount_amount:
+          type: string
+          default: '0'
+          example: '0.00'
+          description: Total discount for the order. Should be positive or zero. Shows up on Tabby App for the Customer's convenience.
+        items:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          description: Array of objects representing the order items in this payment.
+      required:
+      - items
+      - reference_id
+  responses:
+    PaymentResponse:
+      description: Success. Payment object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentResponse'
+    PaymentCaptureResponse:
+      description: Success. Payment object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCaptureResponse'
+    PaymentUpdate:
+      description: Success. Payment object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentUpdate'
+    AuthenticationError:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401'
+    PaymentRefundResponse:
+      description: Success. Payment object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRefundResponse'
+    BadRequestError_PaymentsGet:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_PaymentsGet'
+    BadRequestError_PaymentsRefund:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_PaymentsRefund'
+    AuthenticationError_PaymentsGet:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_missingBearer'
+    PaymentClose:
+      description: Success. Payment object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentClose'
+    UnexpectedError:
+      description: Something bad happened. We're notified.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_500'
+    BadRequestError_failed:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_failed'
+    ForbiddenError:
+      description: You tried to perform an action which is forbidden.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_403'
+    BadRequestError_PaymentsClose:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_PaymentsClose'
+    BadRequestError_PaymentsCapture:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_PaymentsCapture'
+    Payments:
+      description: Success. Returns a list of payments.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              payments:
+                type: array
+                nullable: true
+                items:
+                  $ref: '#/components/schemas/PaymentResponse'
+              pagination:
+                $ref: '#/components/schemas/Pagination'
+    PaymentRefundError:
+      description: Refund is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_409'
+    NotFoundError_no_such_payment:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404_no_such_payment'
+  parameters:
+    paymentIdParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: payment id, uuid format
+      description: ID of the payment.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer authentication header of the form `Bearer <secret_key>`, where `<secret_key>` is your `secret_key`.
+
+        '
+x-tagGroups:
+- name: API
+  tags:
+  - Checkout
+  - Payments
+  - Webhooks
+  - Disputes
