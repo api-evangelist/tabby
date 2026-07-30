@@ -1,104 +1,176 @@
 aid: tabby
 url: https://raw.githubusercontent.com/api-evangelist/tabby/refs/heads/main/apis.yml
 apis:
-  - aid: tabby:tabby-checkout-api
-    name: Tabby Checkout API
-    tags:
-      - BNPL
-      - Buy Now Pay Later
-      - Checkout
-      - Payments
-      - Sessions
-    humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
-    properties:
-      - url: https://docs.tabby.ai/api-reference/checkout/create-a-session
-        type: Documentation
-      - url: https://docs.tabby.ai/api-reference/overview
-        type: Documentation
-      - url: openapi/tabby-api-openapi.yml
-        type: OpenAPI
-      - url: json-schema/tabby-checkout-session-schema.json
-        type: JSONSchema
-      - url: json-schema/tabby-order-item-schema.json
-        type: JSONSchema
-      - url: json-ld/tabby-context.jsonld
-        type: JSONLD
-    description: >-
-      Create and retrieve Tabby Checkout sessions. Posting customer, order, and buyer-history data to /api/v2/checkout
-      creates a Session plus Payment and returns a pre-scoring result with a hosted web_url (or QR code) that the buyer
-      follows to complete Pay-in-4 or monthly-installment authorization. Supports AED, SAR, and KWD across two regional
-      production hosts (api.tabby.ai for UAE/Kuwait, api.tabby.sa for KSA).
-  - aid: tabby:tabby-payments-api
-    name: Tabby Payments API
-    tags:
-      - BNPL
-      - Buy Now Pay Later
-      - Captures
-      - Payments
-      - Refunds
-    humanURL: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
-    properties:
-      - url: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
-        type: Documentation
-      - url: https://docs.tabby.ai/api-reference/payments/capture-a-payment
-        type: Documentation
-      - url: https://docs.tabby.ai/api-reference/payments/refund-a-payment
-        type: Documentation
-      - url: https://docs.tabby.ai/api-reference/payments/close-a-payment
-        type: Documentation
-      - url: openapi/tabby-api-openapi.yml
-        type: OpenAPI
-      - url: json-schema/tabby-payment-schema.json
-        type: JSONSchema
-      - url: json-schema/tabby-capture-schema.json
-        type: JSONSchema
-      - url: json-schema/tabby-refund-schema.json
-        type: JSONSchema
-    description: >-
-      Lifecycle management for an authorized Tabby BNPL payment. Retrieve a payment by id, list payments with
-      pagination/status filters, update the merchant reference_id, capture authorized funds (full or partial), refund a
-      closed payment (full or partial with line items), and close a payment when fulfilment is complete. All endpoints
-      require a secret-key Bearer token.
-  - aid: tabby:tabby-webhooks-api
-    name: Tabby Webhooks API
-    tags:
-      - BNPL
-      - Buy Now Pay Later
-      - Events
-      - Webhooks
-    humanURL: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
-    properties:
-      - url: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
-        type: Documentation
-      - url: openapi/tabby-api-openapi.yml
-        type: OpenAPI
-      - url: json-schema/tabby-webhook-event-schema.json
-        type: JSONSchema
-    description: >-
-      Register, list, retrieve, update, and remove Tabby webhook endpoints scoped to a merchant_code. Tabby fires
-      authorize, capture, close, reject, expire, refund, and update events as JSON POSTs to your HTTPS endpoint with
-      optional arbitrary auth-header signing. Failed deliveries retry with exponential backoff (1m timeout, up to 4
-      retries at 1-4 minute intervals).
-  - aid: tabby:tabby-disputes-api
-    name: Tabby Disputes API
-    tags:
-      - BNPL
-      - Buy Now Pay Later
-      - Disputes
-      - Chargebacks
-    humanURL: https://docs.tabby.ai/api-reference/disputes
-    properties:
-      - url: https://docs.tabby.ai/api-reference/disputes
-        type: Documentation
-      - url: openapi/tabby-api-openapi.yml
-        type: OpenAPI
-      - url: json-schema/tabby-dispute-schema.json
-        type: JSONSchema
-    description: >-
-      Programmatic dispute handling mirroring the Tabby Merchant Dashboard. List the 100 most recent disputes, retrieve
-      a single dispute, provide evidence, and bulk-approve (up to 20 at a time, refunds the customer) or challenge new
-      disputes for support review. Upload PNG/JPEG/PDF evidence attachments up to 5MB. Live payments only with
-      secret-key Bearer auth.
+- aid: tabby:tabby-checkout-api
+  name: Tabby Checkout API
+  description: Checkout is a whole process of customer data collection and payment authorization.
+  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  tags:
+  - Checkout
+  properties:
+  - type: OpenAPI
+    url: openapi/tabby-checkout-api-openapi.yml
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/overview
+  - type: JSONSchema
+    url: json-schema/tabby-checkout-session-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-order-item-schema.json
+  - type: JSONLD
+    url: json-ld/tabby-context.jsonld
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/capture-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/refund-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/close-a-payment
+  - type: JSONSchema
+    url: json-schema/tabby-payment-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-capture-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-refund-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
+  - type: JSONSchema
+    url: json-schema/tabby-webhook-event-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/disputes
+  - type: JSONSchema
+    url: json-schema/tabby-dispute-schema.json
+- aid: tabby:tabby-disputes-api
+  name: Tabby Disputes API
+  description: >-
+    The Disputes API is designed to simplify the process of handling disputes and help merchants resolve
+    issues with customer orders more efficiently. Merchants can use this API to retrieve a list of disputes,
+    view details about a specific dispute, and approve or challenge a bunch of disputes. It mirrors the
+    functionality available in Tabby Merchant Dashboard and operates exclusively with live payments using
+    live credentials. A secret key is required for using the Disputes API. <SchemaDefinition schemaRef="#/components/schemas/Webhook"
+    />
+  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  tags:
+  - Disputes
+  properties:
+  - type: OpenAPI
+    url: openapi/tabby-disputes-api-openapi.yml
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/overview
+  - type: JSONSchema
+    url: json-schema/tabby-checkout-session-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-order-item-schema.json
+  - type: JSONLD
+    url: json-ld/tabby-context.jsonld
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/capture-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/refund-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/close-a-payment
+  - type: JSONSchema
+    url: json-schema/tabby-payment-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-capture-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-refund-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
+  - type: JSONSchema
+    url: json-schema/tabby-webhook-event-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/disputes
+  - type: JSONSchema
+    url: json-schema/tabby-dispute-schema.json
+- aid: tabby:tabby-payments-api
+  name: Tabby Payments API
+  description: The core of tabby is a payments flow enabling you to handle payments at your webstore.
+  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  tags:
+  - Payments
+  properties:
+  - type: OpenAPI
+    url: openapi/tabby-payments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/overview
+  - type: JSONSchema
+    url: json-schema/tabby-checkout-session-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-order-item-schema.json
+  - type: JSONLD
+    url: json-ld/tabby-context.jsonld
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/capture-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/refund-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/close-a-payment
+  - type: JSONSchema
+    url: json-schema/tabby-payment-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-capture-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-refund-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
+  - type: JSONSchema
+    url: json-schema/tabby-webhook-event-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/disputes
+  - type: JSONSchema
+    url: json-schema/tabby-dispute-schema.json
+- aid: tabby:tabby-webhooks-api
+  name: Tabby Webhooks API
+  description: Manage webhook endpoints.
+  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/tabby-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/overview
+  - type: JSONSchema
+    url: json-schema/tabby-checkout-session-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-order-item-schema.json
+  - type: JSONLD
+    url: json-ld/tabby-context.jsonld
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/capture-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/refund-a-payment
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/payments/close-a-payment
+  - type: JSONSchema
+    url: json-schema/tabby-payment-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-capture-schema.json
+  - type: JSONSchema
+    url: json-schema/tabby-refund-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
+  - type: JSONSchema
+    url: json-schema/tabby-webhook-event-schema.json
+  - type: Documentation
+    url: https://docs.tabby.ai/api-reference/disputes
+  - type: JSONSchema
+    url: json-schema/tabby-dispute-schema.json
 name: Tabby
 tags:
   - BNPL
@@ -112,7 +184,20 @@ tags:
   - Saudi Arabia
   - UAE
 kind: contract
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: enterprise
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Enterprise · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/tabby.png
 access: 3rd-Party
 common:
   - type: AgenticAccess
