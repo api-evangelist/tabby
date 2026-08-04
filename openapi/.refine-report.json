@@ -1,0 +1,20 @@
+{
+  "provider": "tabby",
+  "sources": [
+    "tabby-checkout-api-openapi.yml",
+    "tabby-disputes-api-openapi.yml",
+    "tabby-payments-api-openapi.yml",
+    "tabby-webhooks-api-openapi.yml"
+  ],
+  "outputs": [
+    "tabby-checkout-api-openapi.yml",
+    "tabby-disputes-api-openapi.yml",
+    "tabby-payments-api-openapi.yml",
+    "tabby-webhooks-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
