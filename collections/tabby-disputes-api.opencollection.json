@@ -1,0 +1,172 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tabby API Reference Checkout Disputes API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Disputes",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get disputes list",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tabby.ai/api/v1/disputes",
+            "params": [
+              {
+                "name": "statuses",
+                "value": "",
+                "type": "query",
+                "description": "Dispute status. If not set, then all statuses will be in result."
+              },
+              {
+                "name": "created_at_gte",
+                "value": "",
+                "type": "query",
+                "description": "Filter disputes created after or at the specified date and time."
+              },
+              {
+                "name": "created_at_lte",
+                "value": "",
+                "type": "query",
+                "description": "Filter disputes created before or at the specified date and time."
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "To load the next page of disputed items provide page token. This code can be obtained from the `next_page_token` variable in the response of dispute list. If `next_page_token` is empty in response, it means last page of disputes has been reached."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns list of 100 recently created disputes."
+        },
+        {
+          "info": {
+            "name": "Get dispute by id",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tabby.ai/api/v1/disputes/:disputeId",
+            "params": [
+              {
+                "name": "dispute_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the dispute."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns detailed information about dispute."
+        },
+        {
+          "info": {
+            "name": "Provide evidence for a dispute",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tabby.ai/api/v1/disputes/:disputeId/provide-evidence",
+            "params": [
+              {
+                "name": "dispute_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the dispute."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Provide evidence (text and/or attachments) for a dispute. Used by the merchant to submit proof in response to an evidence request."
+        },
+        {
+          "info": {
+            "name": "Approve disputes",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tabby.ai/api/v1/disputes/approve",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Approve disputes (refund money to the customer). Only 20 disputes can be approved within a single request."
+        },
+        {
+          "info": {
+            "name": "Challenge disputes",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tabby.ai/api/v1/disputes/challenge",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Challenge disputes (request Tabby support to take a look at the case). Only 20 disputes can be challenged within a single request. Only disputes with status 'new' might be challenged."
+        },
+        {
+          "info": {
+            "name": "Upload attachment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tabby.ai/api/v1/disputes/attachments/upload",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "attachment",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Upload an attachment. Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

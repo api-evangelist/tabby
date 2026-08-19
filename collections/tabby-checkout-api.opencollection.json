@@ -1,0 +1,60 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tabby API Reference Checkout API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Checkout",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create a session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tabby.ai/api/v2/checkout",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Creates a Checkout session. Creates Session and Payment, returns Pre-Scoring result (status), ids of Payment and Session."
+        },
+        {
+          "info": {
+            "name": "Retrieve an existing checkout session",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tabby.ai/api/v2/checkout/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the session."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Use this API to retrieve the token (only if tokens used in your integration )"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

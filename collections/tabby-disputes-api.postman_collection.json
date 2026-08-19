@@ -1,0 +1,2141 @@
+{
+  "item": [
+    {
+      "id": "6a54b1f7-bda4-48db-9b29-0ca8b6c46c94",
+      "name": "Disputes",
+      "description": {
+        "content": "The Disputes API is designed to simplify the process of handling disputes and help merchants resolve issues with customer orders more efficiently. Merchants can use this API to retrieve a list of disputes, view details about a specific dispute, and approve or challenge a bunch of disputes. It mirrors the functionality available in Tabby Merchant Dashboard and operates exclusively with live payments using live credentials. A secret key is required for using the Disputes API. <SchemaDefinition schemaRef=\"#/components/schemas/Webhook\" />",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "9e474caf-694b-420d-9e44-e89647590680",
+          "name": "Get disputes list",
+          "request": {
+            "name": "Get disputes list",
+            "description": {
+              "content": "Returns list of 100 recently created disputes.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "disputes"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "statuses",
+                  "value": "new",
+                  "description": "Dispute status. If not set, then all statuses will be in result."
+                },
+                {
+                  "disabled": false,
+                  "key": "created_at_gte",
+                  "value": "<string>",
+                  "description": "Filter disputes created after or at the specified date and time."
+                },
+                {
+                  "disabled": false,
+                  "key": "created_at_lte",
+                  "value": "<string>",
+                  "description": "Filter disputes created before or at the specified date and time."
+                },
+                {
+                  "disabled": false,
+                  "key": "page_token",
+                  "value": "<string>",
+                  "description": "To load the next page of disputed items provide page token. This code can be obtained from the `next_page_token` variable in the response of dispute list. If `next_page_token` is empty in response, it means last page of disputes has been reached."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "5a0b0cc9-15d3-4d2b-b928-7e4c8e863b43",
+              "name": "Success. Returns a list of disputes.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "statuses",
+                      "value": "evidence_customer"
+                    },
+                    {
+                      "key": "created_at_gte",
+                      "value": "created_at_gte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "created_at_lte",
+                      "value": "created_at_lte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "page_token",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"disputes\": [\n    {\n      \"id\": \"e2ea0dbd-1207-94cd-b864-d5f246f0fb80\",\n      \"attachments\": [\n        \"attachment_1\",\n        \"attachment_1\"\n      ],\n      \"payment_id\": \"f0b2028c-fa3a-516c-b1ee-cbb99a08433e\",\n      \"amount\": \"100.00\",\n      \"currency\": \"AED\",\n      \"created_at\": \"2018-10-17 00:00:00+00:00\",\n      \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n      \"status\": \"new\",\n      \"reason\": \"unreceived_refund\",\n      \"days_left\": 9536,\n      \"items\": [\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        },\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        }\n      ],\n      \"order_number\": \"#1234\",\n      \"comment\": \"additional comments\"\n    },\n    {\n      \"id\": \"1a8c85ee-9ae6-fbbe-e862-2eb764703924\",\n      \"attachments\": [\n        \"attachment_1\",\n        \"attachment_1\"\n      ],\n      \"payment_id\": \"7f482246-1888-cd57-c663-a52924587ce5\",\n      \"amount\": \"100.00\",\n      \"currency\": \"AED\",\n      \"created_at\": \"2018-10-17 00:00:00+00:00\",\n      \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n      \"status\": \"new\",\n      \"reason\": \"unreceived_refund\",\n      \"days_left\": 4872,\n      \"items\": [\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        },\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        }\n      ],\n      \"order_number\": \"#1234\",\n      \"comment\": \"additional comments\"\n    }\n  ],\n  \"next_page_token\": \"next_page_token\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3d7d9fc3-40e8-4a5e-9cc3-10353268403a",
+              "name": "One of the required fields is missing or request is not formatted correctly.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "statuses",
+                      "value": "evidence_customer"
+                    },
+                    {
+                      "key": "created_at_gte",
+                      "value": "created_at_gte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "created_at_lte",
+                      "value": "created_at_lte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "page_token",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"bad_data\",\n  \"error\": \"bad_request\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8b75c6f5-bf14-4552-9b88-0ce0c5e7773e",
+              "name": "The request cannot be authorized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "statuses",
+                      "value": "evidence_customer"
+                    },
+                    {
+                      "key": "created_at_gte",
+                      "value": "created_at_gte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "created_at_lte",
+                      "value": "created_at_lte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "page_token",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_authorized\",\n  \"error\": \"invalid secret key\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ded06e1b-f97b-40ed-862e-01091faeff5a",
+              "name": "You are using an incorrect ID.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "statuses",
+                      "value": "evidence_customer"
+                    },
+                    {
+                      "key": "created_at_gte",
+                      "value": "created_at_gte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "created_at_lte",
+                      "value": "created_at_lte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "page_token",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"404 page not found\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "07a33920-9068-4607-967f-3d4a1497e26d",
+              "name": "Something bad happened. We're notified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "statuses",
+                      "value": "evidence_customer"
+                    },
+                    {
+                      "key": "created_at_gte",
+                      "value": "created_at_gte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "created_at_lte",
+                      "value": "created_at_lte=2022-12-01T00:00:00Z"
+                    },
+                    {
+                      "key": "page_token",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"Internal Server error\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "39ea5342-1439-4c5b-a680-972d25db4f42",
+          "name": "Get dispute by id",
+          "request": {
+            "name": "Get dispute by id",
+            "description": {
+              "content": "Returns detailed information about dispute.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "disputes",
+                ":disputeId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "dispute_id",
+                  "description": "(Required) ID of the dispute."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d2c78a4a-1711-43a1-8ce8-e1a4caf2c15e",
+              "name": "Success. Returns dispute info.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"dispute\": {\n    \"id\": \"80f103c8-fdf1-3843-3cc3-fc22b0b83804\",\n    \"attachments\": [\n      \"attachment_1\",\n      \"attachment_1\"\n    ],\n    \"payment_id\": \"c7a462f6-327c-03ad-cd69-d82db3d3c6db\",\n    \"amount\": \"100.00\",\n    \"currency\": \"AED\",\n    \"created_at\": \"2018-10-17 00:00:00+00:00\",\n    \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n    \"status\": \"new\",\n    \"reason\": \"unreceived_refund\",\n    \"days_left\": 3925,\n    \"history\": [\n      {\n        \"attachments\": [\n          \"attachment_1\",\n          \"attachment_1\"\n        ],\n        \"created_at\": \"2018-10-17 00:00:00+00:00\",\n        \"created_by\": \"email address of the source\",\n        \"content\": \"customer comment\",\n        \"source\": \"merchant\",\n        \"event_type\": \"dispute_created\",\n        \"note\": \"additional comments\"\n      },\n      {\n        \"attachments\": [\n          \"attachment_1\",\n          \"attachment_1\"\n        ],\n        \"created_at\": \"2018-10-17 00:00:00+00:00\",\n        \"created_by\": \"email address of the source\",\n        \"content\": \"customer comment\",\n        \"source\": \"merchant\",\n        \"event_type\": \"dispute_created\",\n        \"note\": \"additional comments\"\n      }\n    ],\n    \"items\": [\n      {\n        \"reference_id\": \"payment id\",\n        \"title\": \"Order item title\",\n        \"unit_price\": \"100.00\"\n      },\n      {\n        \"reference_id\": \"payment id\",\n        \"title\": \"Order item title\",\n        \"unit_price\": \"100.00\"\n      }\n    ],\n    \"order_number\": \"#1234\",\n    \"comment\": \"additional comments\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6ac19cad-d1d2-45fe-96d6-c04f1a05b017",
+              "name": "One of the required fields is missing or request is not formatted correctly.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"bad_data\",\n  \"error\": \"bad_request\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d83d20d0-3549-4dd0-b25a-30cf68704bf2",
+              "name": "The request cannot be authorized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_authorized\",\n  \"error\": \"invalid secret key\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "510a8c45-976c-45e2-97fc-277241466bec",
+              "name": "You are using an incorrect ID.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_found\",\n  \"error\": \"dispute not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "27809686-3110-4573-8a97-1cecea05102e",
+              "name": "Something bad happened. We're notified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"Internal Server error\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "7ab5c2e7-58ea-47c4-a16d-8826980e0807",
+          "name": "Provide evidence for a dispute",
+          "request": {
+            "name": "Provide evidence for a dispute",
+            "description": {
+              "content": "Provide evidence (text and/or attachments) for a dispute. Used by the merchant to submit proof in response to an evidence request.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "disputes",
+                ":disputeId",
+                "provide-evidence"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "dispute_id",
+                  "description": "(Required) ID of the dispute."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"<string>\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "20f354ff-b340-4a74-88aa-acf1fec6dbc4",
+              "name": "Success. Evidence was submitted for the dispute.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId",
+                    "provide-evidence"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"0d4753bc-b0e3-00c5-d269-cd5aaa7e8ee6\",\n  \"dispute_id\": \"92a9c188-4e07-06e7-bfed-1d88323a01e7\",\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"created_by\": \"merchant\",\n  \"created_at\": \"2024-01-15T10:30:00Z\",\n  \"attachment_ids\": [\n    \"608e8e18-2e8c-27c4-ccb0-9fb6b5212e26\",\n    \"aaf88206-99b3-8b92-3fb5-5414f64aa2ca\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "01de360e-3ebf-48e1-b632-758ebf8a4574",
+              "name": "One of the required fields is missing or request is not formatted correctly.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId",
+                    "provide-evidence"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"bad_data\",\n  \"error\": \"bad_request\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9cb50ca7-a052-4129-8c58-d95b7978e8bf",
+              "name": "The request cannot be authorized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId",
+                    "provide-evidence"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_authorized\",\n  \"error\": \"invalid secret key\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f0604315-03a0-498a-9648-2ba8df9b8321",
+              "name": "You are using an incorrect ID.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId",
+                    "provide-evidence"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_found\",\n  \"error\": \"dispute not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1dae2510-ed97-41cf-89a3-86a23050ba1e",
+              "name": "Conflict. Evidence cannot be submitted for the dispute in its current state.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId",
+                    "provide-evidence"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"conflict\",\n  \"error\": \"payment is disputed\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9bbcd833-d43e-4ece-a6ea-3afdc843d583",
+              "name": "Something bad happened. We're notified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    ":disputeId",
+                    "provide-evidence"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "dispute_id",
+                      "description": "(Required) ID of the dispute."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"I am providing a photo of the damaged product that was received\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"Internal Server error\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "0132cbcf-96b1-4fa9-b379-e29245ae73f9",
+          "name": "Approve disputes",
+          "request": {
+            "name": "Approve disputes",
+            "description": {
+              "content": "Approve disputes (refund money to the customer). Only 20 disputes can be approved within a single request.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "disputes",
+                "approve"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dispute_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "f067891d-7fcb-4eb9-a562-89a1e5ae9470",
+              "name": "Success. Disputes were approved.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "approve"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"disputes\": [\n    {\n      \"id\": \"8b601b0d-604a-0cc5-0902-f79a52a4717b\",\n      \"attachments\": [\n        \"attachment_1\",\n        \"attachment_1\"\n      ],\n      \"payment_id\": \"9950ba79-eee4-261c-978e-19b2ba3eb75c\",\n      \"amount\": \"100.00\",\n      \"currency\": \"AED\",\n      \"created_at\": \"2018-10-17 00:00:00+00:00\",\n      \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n      \"status\": \"new\",\n      \"reason\": \"unreceived_refund\",\n      \"days_left\": 6509,\n      \"items\": [\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        },\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        }\n      ],\n      \"order_number\": \"#1234\",\n      \"comment\": \"additional comments\"\n    },\n    {\n      \"id\": \"6661f302-5df1-4592-7ecd-f762cad78702\",\n      \"attachments\": [\n        \"attachment_1\",\n        \"attachment_1\"\n      ],\n      \"payment_id\": \"63098e3e-246b-f419-5550-1645d3dd0ca9\",\n      \"amount\": \"100.00\",\n      \"currency\": \"AED\",\n      \"created_at\": \"2018-10-17 00:00:00+00:00\",\n      \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n      \"status\": \"new\",\n      \"reason\": \"unreceived_refund\",\n      \"days_left\": 3871,\n      \"items\": [\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        },\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        }\n      ],\n      \"order_number\": \"#1234\",\n      \"comment\": \"additional comments\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cc930f56-2e8b-4db2-aa33-ea4b7164d61c",
+              "name": "One of the required fields is missing or request is not formatted correctly.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "approve"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"bad_data\",\n  \"error\": \"bad_request\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5d6aa110-2835-4449-b0c3-be0bdaf4a949",
+              "name": "The request cannot be authorized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "approve"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_authorized\",\n  \"error\": \"invalid secret key\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "342e88a3-dd16-468c-80fc-ac6b66d824f8",
+              "name": "You are using an incorrect ID.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "approve"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"404 page not found\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "391112c3-62bc-4ef9-a536-71ffa28eae26",
+              "name": "Something bad happened. We're notified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "approve"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"Internal Server error\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "797779e8-40c3-442d-8c72-8dcd46163cb4",
+          "name": "Challenge disputes",
+          "request": {
+            "name": "Challenge disputes",
+            "description": {
+              "content": "Challenge disputes (request Tabby support to take a look at the case). Only 20 disputes can be challenged within a single request. Only disputes with status 'new' might be challenged.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "disputes",
+                "challenge"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dispute_id\": \"<string>\",\n  \"description\": \"<string>\",\n  \"reason\": \"<string>\",\n  \"amount\": \"<string>\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "05f30446-f150-463f-8a91-889e2fd56be7",
+              "name": "Success. Disputes were challenged.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "challenge"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_id\": \"uuid\",\n  \"description\": \"Comment for Tabby support\",\n  \"reason\": \"merchant_reason_other\",\n  \"amount\": \"100\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"disputes\": [\n    {\n      \"id\": \"8b601b0d-604a-0cc5-0902-f79a52a4717b\",\n      \"attachments\": [\n        \"attachment_1\",\n        \"attachment_1\"\n      ],\n      \"payment_id\": \"9950ba79-eee4-261c-978e-19b2ba3eb75c\",\n      \"amount\": \"100.00\",\n      \"currency\": \"AED\",\n      \"created_at\": \"2018-10-17 00:00:00+00:00\",\n      \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n      \"status\": \"new\",\n      \"reason\": \"unreceived_refund\",\n      \"days_left\": 6509,\n      \"items\": [\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        },\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        }\n      ],\n      \"order_number\": \"#1234\",\n      \"comment\": \"additional comments\"\n    },\n    {\n      \"id\": \"6661f302-5df1-4592-7ecd-f762cad78702\",\n      \"attachments\": [\n        \"attachment_1\",\n        \"attachment_1\"\n      ],\n      \"payment_id\": \"63098e3e-246b-f419-5550-1645d3dd0ca9\",\n      \"amount\": \"100.00\",\n      \"currency\": \"AED\",\n      \"created_at\": \"2018-10-17 00:00:00+00:00\",\n      \"expired_at\": \"2018-10-17 00:00:00+00:00\",\n      \"status\": \"new\",\n      \"reason\": \"unreceived_refund\",\n      \"days_left\": 3871,\n      \"items\": [\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        },\n        {\n          \"reference_id\": \"payment id\",\n          \"title\": \"Order item title\",\n          \"unit_price\": \"100.00\"\n        }\n      ],\n      \"order_number\": \"#1234\",\n      \"comment\": \"additional comments\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "662b90ae-cf54-4214-a966-31f3a7f3fc29",
+              "name": "One of the required fields is missing or request is not formatted correctly.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "challenge"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_id\": \"uuid\",\n  \"description\": \"Comment for Tabby support\",\n  \"reason\": \"merchant_reason_other\",\n  \"amount\": \"100\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"bad_data\",\n  \"error\": \"bad_request\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "605e0fe4-cc59-4873-888a-926138b8e3d9",
+              "name": "The request cannot be authorized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "challenge"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_id\": \"uuid\",\n  \"description\": \"Comment for Tabby support\",\n  \"reason\": \"merchant_reason_other\",\n  \"amount\": \"100\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_authorized\",\n  \"error\": \"invalid secret key\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "abd83373-b8c5-4dc3-b080-9869af9652ef",
+              "name": "You are using an incorrect ID.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "challenge"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_id\": \"uuid\",\n  \"description\": \"Comment for Tabby support\",\n  \"reason\": \"merchant_reason_other\",\n  \"amount\": \"100\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"404 page not found\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "daae5a92-9d79-468e-9c00-6917a8503dc8",
+              "name": "Something bad happened. We're notified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "challenge"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dispute_id\": \"uuid\",\n  \"description\": \"Comment for Tabby support\",\n  \"reason\": \"merchant_reason_other\",\n  \"amount\": \"100\",\n  \"attachment_ids\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"Internal Server error\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c325b43f-4254-49ae-b3bf-114894d532f6",
+          "name": "Upload attachment",
+          "request": {
+            "name": "Upload attachment",
+            "description": {
+              "content": "Upload an attachment. Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "disputes",
+                "attachments",
+                "upload"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachment",
+                  "type": "file",
+                  "description": "(Required) Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected."
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "525624df-d384-4ad3-9389-8cfe92e938cd",
+              "name": "Success. Attachment was uploaded.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "attachments",
+                    "upload"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.",
+                        "type": "text/plain"
+                      },
+                      "key": "attachment",
+                      "value": "<binary>",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"6c6d833c-1348-3b2b-2c5b-c20ff0565865\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bb3a4daf-3e30-4e33-af11-c60a7cce3a51",
+              "name": "One of the required fields is missing or request is not formatted correctly.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "attachments",
+                    "upload"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.",
+                        "type": "text/plain"
+                      },
+                      "key": "attachment",
+                      "value": "<binary>",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"bad_data\",\n  \"error\": \"bad_request\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bb875f30-c711-44cd-a446-c069d3bb0434",
+              "name": "The request cannot be authorized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "attachments",
+                    "upload"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.",
+                        "type": "text/plain"
+                      },
+                      "key": "attachment",
+                      "value": "<binary>",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"errorType\": \"not_authorized\",\n  \"error\": \"invalid secret key\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7cc171ea-9455-4ef9-bf6a-8d9e4502b15a",
+              "name": "Something bad happened. We're notified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "disputes",
+                    "attachments",
+                    "upload"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.",
+                        "type": "text/plain"
+                      },
+                      "key": "attachment",
+                      "value": "<binary>",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "\"Internal Server error\"",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.tabby.ai/",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "ccc9cfd4-e809-4607-9deb-d62e55a93190",
+    "name": "Tabby API Reference Checkout Disputes API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Tabby Documentation:  **[docs.tabby.ai](https://docs.tabby.ai/)**\n",
+      "type": "text/plain"
+    }
+  }
+}
