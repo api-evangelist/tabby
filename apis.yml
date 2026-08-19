@@ -1,5 +1,6 @@
 aid: tabby
 url: https://raw.githubusercontent.com/api-evangelist/tabby/refs/heads/main/apis.yml
+specificationVersion: '0.23'
 apis:
 - aid: tabby:tabby-checkout-api
   name: Tabby Checkout API
