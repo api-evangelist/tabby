@@ -136,6 +136,8 @@ apis:
   description: Manage webhook endpoints.
   humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
@@ -174,6 +176,17 @@ apis:
     url: json-schema/tabby-dispute-schema.json
 name: Tabby
 tags:
+  - BNPL
+  - Buy Now Pay Later
+  - Consumer Finance
+  - E-Commerce
+  - Fintech
+  - Installments
+  - MENA
+  - Payments
+  - Saudi Arabia
+  - UAE
+tags_raw:
   - BNPL
   - Buy Now Pay Later
   - Consumer Finance
