@@ -1,45 +1,126 @@
 specification: API Commons Rate Limits
 specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+generated: '2026-08-26'
+method: searched
+source: https://docs.tabby.ai/introduction/technical-requirements#rate-limit
 provider: Tabby
 providerId: tabby
 created: '2026-05-24'
-modified: '2026-05-24'
-reconciled: false
+modified: '2026-08-26'
+reconciled: true
 tags:
   - BNPL
   - Payments
   - Rate Limiting
-description: 'Tabby does not publish formal per-merchant request-rate or throughput numbers in its public
-  documentation. Practical limits documented below are derived from the OpenAPI surface and behavioural notes
-  in the merchant docs. Webhook delivery has explicit retry semantics (1m timeout, 4 retries with 1-4 minute
-  exponential backoff).'
+description: >-
+  Tabby publishes exact rate limits with numbers, split by key environment and by operation class.
+  Limits are enforced per API key and measured per operation, with Create Session treated as its own
+  class. Exhaustion returns HTTP 429. The API returns no rate-limit response headers of any kind, so
+  the published numbers are the only budget signal an integrator has — there is nothing to read at
+  runtime.
 sources:
-  - https://docs.tabby.ai/api-reference/overview
-  - https://docs.tabby.ai/api-reference/disputes
+  - https://docs.tabby.ai/introduction/technical-requirements#rate-limit
   - https://docs.tabby.ai/pay-in-4-custom-integration/webhooks
+  - https://docs.tabby.ai/api-reference/disputes
+limit_count: 4
 headers:
-  retryAfter: retry-after
+  rateLimitLimit: null
+  rateLimitRemaining: null
+  rateLimitReset: null
+  retryAfter: null
+  note: >-
+    None published and none observed. No RateLimit-*, X-RateLimit-* or Retry-After header is
+    documented, and no 429 response is declared in the OpenAPI.
 responseCodes:
   throttled: 429
   quotaExceeded: 429
   authFailure: 401
   forbidden: 403
-algorithm: undisclosed
+algorithm: fixed-window (per API key, per operation class)
+scope: per-key
 limits:
-  - resource: /api/v1/disputes/approve
+  - id: live-create-session
+    scope: per-key
+    environment: live
+    operationClass: Create Session
+    operations:
+      - postCheckoutSession
+    resource: POST /api/v2/checkout
+    limit: 200
+    window: 10s
+    burst: null
+  - id: live-other
+    scope: per-key
+    environment: live
+    operationClass: Payment operations
+    operations:
+      - getCheckoutSession
+      - getPayment
+      - putPayment
+      - postPaymentCapture
+      - postPaymentRefund
+      - closePayment
+      - getPayments
+      - postWebhook
+      - getWebhooks
+      - getWebhook
+      - putWebhook
+      - deleteWebhook
+      - getDisputes
+      - getDispute
+      - postDisputeProvideEvidence
+      - postDisputesApprove
+      - postDisputesChallenge
+      - postUploadAttachment
+    resource: all non-Create-Session operations
+    limit: 100
+    window: 1s
+    burst: null
+  - id: test-create-session
+    scope: per-key
+    environment: test
+    operationClass: Create Session
+    resource: POST /api/v2/checkout
+    limit: 10
+    window: 10s
+    burst: null
+  - id: test-other
+    scope: per-key
+    environment: test
+    operationClass: Payment operations
+    resource: all non-Create-Session operations
+    limit: 50
+    window: 1s
+    burst: null
+payloadLimits:
+  - resource: POST /api/v1/disputes/approve
     perRequestMax: 20
-    note: 'Maximum 20 dispute approvals per single request — bulk-approve in batches.'
-  - resource: /api/v1/disputes
+    note: Maximum 20 dispute approvals per single request — bulk-approve in batches.
+  - resource: POST /api/v1/disputes/challenge
+    perRequestMax: 20
+    note: Maximum 20 dispute challenges per single request; only disputes in status "new" qualify.
+  - resource: GET /api/v1/disputes
     listingMax: 100
-    note: 'GET /api/v1/disputes returns the 100 most recently created disputes.'
-  - resource: /api/v1/disputes/upload-attachment
+    note: Returns the 100 most recently created disputes.
+  - resource: POST /api/v1/disputes/attachments/upload
     maxFileSize: 5242880
     allowedContentTypes:
       - image/png
       - image/jpeg
       - application/pdf
-    note: 'Dispute evidence attachments capped at 5MB. PNG, JPEG, or PDF only.'
+    note: Dispute evidence attachments capped at 5MB. PNG, JPEG or PDF only.
+enforcement_notes:
+  - Performance, load and stress testing against production APIs is not permitted; exclude Tabby
+    from checkout when running them.
+  - Keys and IP addresses may be limited automatically by a firewall, and test or live keys may be
+    limited manually on detection of abuse.
+transactionLimits:
+  published: false
+  note: >-
+    Per-store and per-buyer transaction value limits exist but are not published — they are set
+    dynamically from industry risk and the buyer's history. Tabby explicitly advises merchants not to
+    hard-code limits on their side.
 webhookDelivery:
   acknowledgementCode: 200
   timeoutSeconds: 60
@@ -48,13 +129,18 @@ webhookDelivery:
   retryIntervalMinutes:
     min: 1
     max: 4
+  maxEndpoints: 4
+  maxEndpointsScope: per merchant_code + secret key pair
   notes:
-    - 'A non-200 response (or no response within 1 minute) triggers retry.'
-    - 'Subsequent attempts are spaced at exponentially increasing intervals between 1 and 4 minutes.'
-    - 'Acknowledge immediately with 200 then process asynchronously to avoid retries.'
+    - A non-200 response (or no response within 1 minute) triggers retry.
+    - Subsequent attempts are spaced at exponentially increasing intervals between 1 and 4 minutes.
+    - Retries do not block delivery of webhooks for other payment events.
+    - Acknowledge immediately with 200 then process asynchronously to avoid retries.
 recommendations:
-  - 'Use the reference_id field as an idempotency key on captures and refunds; repeated calls with the
-    same reference_id are a no-op rather than duplicates.'
-  - 'Whitelist Tabby webhook source IPs (provided to merchants on request) at your edge.'
-  - 'Validate the checkout session status is "created" before redirecting the buyer; do not retry session
-    creation on "rejected" — the consumer was declined.'
+  - Budget from the published numbers; there is no runtime header to read. Track your own send rate
+    per key.
+  - Treat 429 as retryable with your own backoff, but never blind-retry a capture or refund without
+    reusing the same reference_id (see conventions/tabby-conventions.yml#idempotency).
+  - Allowlist the eight Tabby webhook source IPs at your edge so deliveries are not dropped.
+  - Validate the checkout session status is "created" before redirecting the buyer; do not retry
+    session creation on "rejected" — the buyer was declined and a retry burns Create Session budget.

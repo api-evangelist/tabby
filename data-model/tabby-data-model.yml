@@ -1,0 +1,267 @@
+generated: '2026-08-26'
+method: derived
+source: >-
+  openapi/_original/tabby-api-openapi.yml ($ref graph and id-reference fields), enriched from
+  https://docs.tabby.ai/api-reference/checkout/session-payload-model and
+  https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses
+provider: Tabby
+providerId: tabby
+summary: >-
+  Four root entities — CheckoutSession, Payment, Webhook and Dispute — over 91 schemas. Payment is
+  the hub: it owns the captures and refunds arrays, carries the buyer, order and shipping snapshots,
+  and is the entity Disputes and Webhooks both point back at by payment id. CheckoutSession and
+  Payment are created together in a single POST and never exist apart. Captures and refunds are
+  embedded arrays with no standalone endpoints, so a merchant reconciles them by re-reading the
+  payment rather than by listing them.
+identifiers:
+  style: opaque string ids, no typed prefixes
+  note: >-
+    Unlike most payments APIs, Tabby ids carry no product prefix (no pay_, no ch_). The only way to
+    tell a payment id from a dispute id is which field it came from. Merchant-side correlation is
+    carried on order.reference_id, which the merchant sets and can update via putPayment.
+  fields:
+    - entity: CheckoutSession
+      field: id
+    - entity: Payment
+      field: id
+      schema: PaymentID
+    - entity: Capture
+      field: id
+    - entity: Refund
+      field: id
+    - entity: Dispute
+      field: id
+      schema: DisputeID
+    - entity: Webhook
+      field: id
+    - entity: Evidence
+      field: id
+  merchant_supplied:
+    - field: order.reference_id
+      purpose: The merchant's own order number. Mutable via putPayment; the only mutable field.
+    - field: captures[].reference_id
+      purpose: Doubles as the idempotency key for a capture.
+    - field: refunds[].reference_id
+      purpose: Doubles as the idempotency key for a refund.
+    - field: meta.order_id
+      purpose: Free correlation slot echoed back on payments and webhooks.
+entities:
+  - name: CheckoutSession
+    schema: CheckoutSession
+    created_by: postCheckoutSession
+    read_by: getCheckoutSession
+    fields: [id, status, configuration, payment, web_url]
+    states: [created, rejected]
+    ttl: 20 minutes
+    note: >-
+      status "created" means pre-scoring passed and web_url is present. "rejected" means Tabby
+      declined the buyer; no reason is returned.
+  - name: Payment
+    schema: PaymentResponse
+    created_by: postCheckoutSession (implicitly, alongside the session)
+    read_by: [getPayment, getPayments]
+    updated_by: [putPayment, postPaymentCapture, postPaymentRefund, closePayment]
+    states: [CREATED, AUTHORIZED, CLOSED, REJECTED, EXPIRED]
+    fields:
+      - id
+      - status
+      - created_at
+      - expires_at
+      - closed_at
+      - amount
+      - currency
+      - captured_amount
+      - is_test
+      - is_expired
+      - buyer
+      - shipping_address
+      - order
+      - buyer_history
+      - order_history
+      - captures
+      - refunds
+      - meta
+      - attachment
+  - name: Capture
+    schema: CaptureResponse
+    created_by: postPaymentCapture
+    standalone_endpoint: false
+    fields: [id, amount, created_at, reference_id, tax_amount, shipping_amount, discount_amount, items]
+  - name: Refund
+    schema: RefundResponse
+    created_by: postPaymentRefund
+    standalone_endpoint: false
+    fields: [id, amount, created_at, reference_id, reason, items]
+  - name: Webhook
+    schema: Webhook
+    created_by: postWebhook
+    read_by: [getWebhooks, getWebhook]
+    updated_by: putWebhook
+    deleted_by: deleteWebhook
+    fields: [id, url, is_test, header]
+  - name: Dispute
+    schema: Dispute
+    read_by: [getDisputes, getDispute]
+    updated_by: [postDisputesApprove, postDisputesChallenge, postDisputeProvideEvidence]
+    states: [new, pending, arbitration, evidence_merchant, approved, declined, cancelled]
+    fields:
+      - id
+      - payment_id
+      - amount
+      - currency
+      - created_at
+      - expired_at
+      - status
+      - reason
+      - days_left
+      - history
+      - items
+      - comment
+      - attachments
+  - name: Evidence
+    schema: Evidence
+    created_by: postDisputeProvideEvidence
+    fields: [id, dispute_id, text, attachments, created_at]
+  - name: Buyer
+    schema: Buyer
+    embedded_in: [CheckoutCreation, PaymentResponse]
+    fields: [phone, email, name, dob]
+  - name: Order
+    schema: Order
+    embedded_in: [CheckoutCreation, PaymentResponse]
+    fields: [reference_id, items, tax_amount, shipping_amount, discount_amount, updated_at]
+  - name: OrderItem
+    schema: OrderItem
+    embedded_in: [Order, Capture, Refund, Dispute]
+    fields_count: 19
+  - name: ShippingAddress
+    schema: ShippingAddress
+    embedded_in: [CheckoutCreation, PaymentResponse]
+    fields: [city, address, zip]
+  - name: BuyerHistory
+    schema: BuyerHistory
+    embedded_in: [CheckoutCreation, PaymentResponse]
+    fields: [registered_since, loyalty_level, wishlist_count, is_social_networks_connected, is_phone_number_verified, is_email_verified]
+    note: Risk-scoring input supplied by the merchant at session creation.
+relationships:
+  - from: CheckoutSession
+    to: Payment
+    type: has_one
+    via: payment
+    note: Created together in a single POST; the payment id is the durable handle.
+  - from: CheckoutSession
+    to: CheckoutConfigurationProduct
+    type: has_one
+    via: configuration
+  - from: CheckoutCreation
+    to: Buyer
+    type: has_one
+    via: buyer
+  - from: CheckoutCreation
+    to: BuyerHistory
+    type: has_one
+    via: buyer_history
+  - from: CheckoutCreation
+    to: ShippingAddress
+    type: has_one
+    via: shipping_address
+  - from: CheckoutCreation
+    to: Order
+    type: has_one
+    via: order
+  - from: CheckoutCreation
+    to: OrderHistory
+    type: has_many
+    via: order_history
+  - from: CheckoutCreation
+    to: Meta
+    type: has_one
+    via: meta
+  - from: Order
+    to: OrderItem
+    type: has_many
+    via: items
+  - from: Payment
+    to: Capture
+    type: has_many
+    via: captures
+  - from: Payment
+    to: Refund
+    type: has_many
+    via: refunds
+  - from: Payment
+    to: Order
+    type: has_one
+    via: order
+  - from: Payment
+    to: Buyer
+    type: has_one
+    via: buyer
+  - from: Payment
+    to: BuyerHistory
+    type: has_one
+    via: buyer_history
+  - from: Payment
+    to: ShippingAddress
+    type: has_one
+    via: shipping_address
+  - from: Payment
+    to: Meta
+    type: has_one
+    via: meta
+  - from: Capture
+    to: OrderItem
+    type: has_many
+    via: items
+  - from: Refund
+    to: OrderItem
+    type: has_many
+    via: items
+  - from: Dispute
+    to: Payment
+    type: belongs_to
+    via: payment_id
+  - from: Dispute
+    to: DisputeOrderItem
+    type: has_many
+    via: items
+  - from: Dispute
+    to: DisputeHistoryItem
+    type: has_many
+    via: history
+  - from: Dispute
+    to: DisputeAttachments
+    type: has_one
+    via: attachments
+  - from: Evidence
+    to: Dispute
+    type: belongs_to
+    via: dispute_id
+  - from: WebhookEvent
+    to: Payment
+    type: belongs_to
+    via: id
+    note: >-
+      The payment webhook payload IS the payment object — its top-level id is the payment id. There
+      is no separate event entity or event id.
+  - from: DisputeWebhookEvent
+    to: Dispute
+    type: belongs_to
+    via: dispute_id
+  - from: DisputeWebhookEvent
+    to: Payment
+    type: belongs_to
+    via: payment_id
+counts:
+  schemas_total: 91
+  root_entities: 4
+  relationships: 26
+  operations: 19
+observations:
+  - Captures and refunds have no list or retrieve endpoint. Reconciliation means re-reading the
+    payment and diffing the arrays.
+  - No customer entity. Buyer data is a per-session snapshot with no id, so there is nothing to look
+    up a returning buyer by.
+  - Dispute is the only entity that references another by an explicit foreign key (payment_id).
+  - order_history and buyer_history are merchant-supplied risk inputs, not Tabby-owned records —
+    they are written into the session, never read back as a resource.

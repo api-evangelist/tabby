@@ -1,0 +1,88 @@
+overlay: 1.0.0
+info:
+  title: Tabby Webhooks API — API Evangelist enrichment overlay
+  version: 1.0.0
+  x-generated: '2026-08-26'
+  x-method: generated
+  x-source: openapi/tabby-webhooks-api-openapi.yml
+  x-note: >-
+    Captures runtime semantics Tabby publishes in its documentation but does not express in the
+    contract — rate limits, idempotency, reversal windows, environment selection and webhook
+    delivery guarantees. Applies to openapi/tabby-webhooks-api-openapi.yml; the original spec is never mutated.
+extends: openapi/tabby-webhooks-api-openapi.yml
+actions:
+  - target: $.info
+    description: Record the region-specific base URLs and the API Evangelist enrichment provenance.
+    update:
+      x-api-evangelist:
+        enriched: '2026-08-26'
+        repo: https://github.com/api-evangelist/tabby
+        conventions: conventions/tabby-conventions.yml
+        errors: errors/tabby-problem-types.yml
+        rate_limits: rate-limits/tabby-rate-limits.yml
+        sandbox: sandbox/tabby-sandbox.yml
+        data_model: data-model/tabby-data-model.yml
+      x-regions:
+        - region: UAE, Kuwait
+          api: https://api.tabby.ai
+          checkout: https://checkout.tabby.ai
+          dashboard: https://merchant.tabby.ai
+        - region: KSA
+          api: https://api.tabby.sa
+          checkout: https://checkout.tabby.sa
+          dashboard: https://merchant.tabby.sa
+  - target: $
+    description: >-
+      Record the rate limits Tabby publishes in prose but does not express in the contract, and the
+      429 response the spec never declares.
+    update:
+      x-rate-limits:
+        source: https://docs.tabby.ai/introduction/technical-requirements#rate-limit
+        scope: per-api-key, per-operation-class
+        exhaustion_status: 429
+        response_headers: none
+        live:
+          create_session: 200 per 10s
+          other: 100 per 1s
+        test:
+          create_session: 10 per 10s
+          other: 50 per 1s
+  - target: $.components.securitySchemes.bearerAuth
+    description: Clarify the key prefixes that select environment, which the description omits.
+    update:
+      x-key-prefixes:
+        live_secret: sk_
+        test_secret: sk_test_
+        live_public: pk_
+        test_public: pk_test_
+      x-environment-selection: >-
+        Environment is chosen by the key, not by the host. The same base URL serves test and live.
+  - target: $.paths['/api/v1/webhooks'].post
+    description: Record registration scope, endpoint cap and delivery semantics absent from the contract.
+    update:
+      x-registration-scope: per merchant_code + secret key pair
+      x-max-endpoints: 4
+      x-environment-selection: >-
+        Determined by the registering key — sk_ subscribes production payments, sk_test_ subscribes
+        test payments.
+      x-delivery:
+        acknowledgement: 200
+        timeout_seconds: 60
+        retries: 4
+        retry_interval_minutes: 1-4 exponential
+        ordering_guarantee: none
+        duplicates: possible
+        signing: optional caller-defined header; no HMAC
+        source_ips:
+          - 34.166.36.90
+          - 34.166.35.211
+          - 34.166.34.222
+          - 34.166.37.207
+          - 34.93.76.191
+          - 34.166.128.182
+          - 34.166.170.3
+          - 34.166.249.7
+      x-status-case: >-
+        Webhook payloads use lowercase statuses; API responses use uppercase. Compare
+        case-insensitively.
+      x-event-catalog: asyncapi/tabby-webhooks.yml

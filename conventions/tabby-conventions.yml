@@ -1,0 +1,284 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/introduction/technical-requirements,
+  https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing,
+  https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses,
+  https://docs.tabby.ai/pay-in-4-custom-integration/webhooks,
+  https://docs.tabby.ai/api-reference/overview,
+  openapi/_original/tabby-api-openapi.yml
+provider: Tabby
+providerId: tabby
+summary: >-
+  Cross-cutting runtime semantics for the Tabby Checkout, Payments, Webhooks and Disputes APIs.
+  Tabby documents an unusually complete set for a regional payments provider: an explicit
+  idempotency mechanism, exact rate limits with numbers, a stated refund window, webhook retry
+  policy with source IPs, and a formal data-format section covering currency, amounts, phones,
+  dates and locales.
+base_urls:
+  regions:
+    - region: UAE, Kuwait
+      api: https://api.tabby.ai
+      checkout: https://checkout.tabby.ai
+      dashboard: https://merchant.tabby.ai
+    - region: KSA
+      api: https://api.tabby.sa
+      checkout: https://checkout.tabby.sa
+      dashboard: https://merchant.tabby.sa
+  note: >-
+    All API paths and payloads are identical across both domains. Region is chosen by the merchant's
+    operating country; environment (test or live) is inferred from the API key, not from the host.
+auth:
+  style: bearer-token
+  header: 'Authorization: Bearer <secret_key>'
+  keys:
+    - name: Secret Key
+      prefix_live: sk_
+      prefix_test: sk_test_
+      use: Server-to-server calls to Checkout, Payments, Webhooks and Disputes.
+    - name: Public Key
+      prefix_live: pk_
+      prefix_test: pk_test_
+      use: Front-end promo snippets, plans and customization. Never send a secret key to the browser.
+  failure: 401 with errorType not_authorized
+  docs: https://docs.tabby.ai/introduction/technical-requirements#authentication
+  detail: authentication/tabby-authentication.yml
+idempotency:
+  supported: true
+  mechanism: request-body-field
+  field: reference_id
+  header: null
+  scope:
+    - postPaymentCapture (POST /api/v2/payments/{id}/captures)
+    - postPaymentRefund (POST /api/v2/payments/{id}/refunds)
+  semantics: >-
+    "Capture and Refund requests support idempotency, so you can safely retry them after a
+    connection error without performing the same operation twice. Pass your own unique key in the
+    reference_id parameter of the request. A retry with the same reference_id will not create a
+    second capture or refund."
+  retention: undocumented
+  key_generation: caller-supplied, must be unique per logical operation
+  docs: https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#idempotent-requests
+  gaps:
+    - Session creation (POST /api/v2/checkout) has no idempotency key — a retried create-session
+      call produces a second session and a second payment.
+    - No retention/expiry window is documented for a reference_id.
+    - The mechanism is a body field, not a standard Idempotency-Key header (RFC draft), so generic
+      HTTP retry middleware cannot apply it automatically.
+pagination:
+  style: offset-limit
+  applies_to:
+    - getPayments (GET /api/v2/payments)
+  parameters:
+    - name: offset
+      in: query
+    - name: limit
+      in: query
+  response_fields:
+    - pagination
+  ordering: Most recent payments first.
+  fixed_caps:
+    - resource: GET /api/v1/disputes
+      cap: 100
+      note: Returns the 100 most recently created disputes; no cursor is offered.
+    - resource: POST /api/v1/disputes/approve
+      cap: 20
+      note: Maximum 20 disputes per request.
+    - resource: POST /api/v1/disputes/challenge
+      cap: 20
+      note: Maximum 20 disputes per request.
+field_expansion:
+  supported: false
+  note: No expand/fields/sparse-fieldset parameter is documented or present in the spec.
+metadata:
+  supported: true
+  field: meta
+  shape: '{ "order_id": string|null, "customer": string|null }'
+  note: >-
+    A constrained meta object, not free-form key/value metadata. Merchant correlation is normally
+    carried on order.reference_id instead.
+request_tracing:
+  request_id_header: null
+  correlation: >-
+    The docs state error responses carry "a unique correlation ID to identify the request", but the
+    field is not named in the OpenAPI error schemas and no request-id response header is documented.
+  gap: true
+versioning:
+  style: path-segment
+  current:
+    - /api/v2 — Checkout and Payments
+    - /api/v1 — Webhooks and Disputes
+  header: null
+  spec_version: '1.0.0'
+  note: >-
+    Two live major versions coexist by product area. No version negotiation header, no dated
+    versions, and no published policy for how a v3 would be introduced.
+error_envelope:
+  format: custom-json
+  rfc9457: false
+  content_type: application/json
+  shape:
+    status: string, always "error"
+    errorType: string, machine-readable class (bad_data, not_authorized, no_permission, not_found, conflict)
+    error: string, human-readable English message for logs — explicitly not for end users and not machine-parseable
+  variants:
+    - Some responses use an errors[] array instead of a single error string.
+    - 404 and 500 can return a bare string body ("404 page not found", "Internal Server error")
+      rather than the error object.
+  detail: errors/tabby-problem-types.yml
+rate_limit_signaling:
+  exhaustion_status: 429
+  response_headers: []
+  note: >-
+    Limits are published as numbers in the docs but the API returns no RateLimit-*, X-RateLimit-* or
+    Retry-After header — an agent cannot read remaining budget at runtime, only detect a 429 after
+    the fact.
+  detail: rate-limits/tabby-rate-limits.yml
+data_formats:
+  currency:
+    standard: ISO 4217
+    supported: [AED, SAR, KWD]
+    decimals:
+      AED: 2
+      SAR: 2
+      KWD: 3
+  amount:
+    type: string
+    example: '100.00'
+    note: Decimal places must follow the currency.
+  dates:
+    standard: ISO 8601, UTC, combined date and time
+    exception: dob fields use YYYY-MM-DD
+  phone:
+    accepted: ['+971500000001', '971500000001', '500000001', '0500000001']
+  locale:
+    standard: RFC 1766
+    supported: [en, ar]
+  strings:
+    max_length: 255
+    encoding: UTF-8
+  case_convention:
+    api_responses: UPPERCASE payment statuses (AUTHORIZED)
+    webhooks: lowercase payment statuses (authorized)
+    guidance: Compare statuses case-insensitively.
+transport_security:
+  tls_minimum: TLSv1.2
+  cipher_suites_restricted: true
+  basis: PCI DSS cipher-suite restriction, published at /introduction/technical-requirements#security-protocol
+  detail: security/tabby-domain-security.yml
+webhook_conventions:
+  delivery: POST JSON to a merchant-registered HTTPS URL
+  acknowledgement: 200
+  timeout_seconds: 60
+  retries: 4
+  retry_interval_minutes: 1-4 exponential
+  ordering_guarantee: none
+  duplicate_delivery: possible — deduplicate
+  source_ip_allowlist:
+    - 34.166.36.90
+    - 34.166.35.211
+    - 34.166.34.222
+    - 34.166.37.207
+    - 34.93.76.191
+    - 34.166.128.182
+    - 34.166.170.3
+    - 34.166.249.7
+  signing: optional caller-defined auth header set at registration; no HMAC signature scheme
+  max_endpoints: 4 per merchant_code + secret key pair
+  detail: asyncapi/tabby-webhooks.yml
+dry_run_mode:
+  supported: false
+  grade: na
+  note: >-
+    No dry-run/preview/simulate parameter exists on any write operation. The nearest equivalent is
+    the eligibility-check use of POST /api/v2/checkout with minimal data, which still creates a
+    session and a payment — it is a pre-scoring call, not a rehearsal.
+reversibility:
+  grade: verified
+  applies: true
+  summary: >-
+    Every money-moving operation Tabby exposes has a documented reversal, and two of the three carry
+    an explicit window stated in the docs.
+  surfaces:
+    - write_operation: postCheckoutSession
+      operation: POST /api/v2/checkout
+      reversal: none-needed
+      reversal_operation: null
+      window: >-
+        A session the customer never completes expires on its own: the checkout session expires 20
+        minutes after creation and the payment moves to EXPIRED about 10 minutes after that (~30
+        minutes total). EXPIRED is terminal and requires no merchant action.
+      window_stated: true
+      docs: https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#session-expiration
+    - write_operation: postPaymentCapture
+      operation: POST /api/v2/payments/{id}/captures
+      reversal: refund
+      reversal_operation: postPaymentRefund
+      window: >-
+        Refunds can be initiated within 180 days from the payment creation. Only a CLOSED payment
+        can be refunded and the refund total cannot exceed the captured amount. A processed refund
+        cannot itself be cancelled.
+      window_stated: true
+      docs: https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#payment-refund
+    - write_operation: authorization (customer completes checkout)
+      operation: n/a — created by the buyer, not by an API call
+      reversal: close-without-capture
+      reversal_operation: closePayment
+      window: >-
+        An AUTHORIZED payment can be cancelled by closing it without capture at any point before
+        capture. Tabby leaves a non-captured payment untouched for 21 days after authorization;
+        after 21 days Tabby may capture the remaining amount in full on its side.
+      window_stated: true
+      docs: https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#missing-captures
+    - write_operation: postPaymentRefund
+      operation: POST /api/v2/payments/{id}/refunds
+      reversal: none
+      reversal_operation: null
+      window: null
+      window_stated: false
+      note: >-
+        Irreversible by design — "A processed refund cannot be cancelled." An agent must treat a
+        refund as a terminal action.
+    - write_operation: putPayment
+      operation: PUT /api/v2/payments/{id}
+      reversal: re-issue
+      reversal_operation: putPayment
+      window: >-
+        Only order.reference_id is mutable and it can be updated again at any time while the payment
+        is AUTHORIZED or CLOSED. No stated deadline.
+      window_stated: false
+    - write_operation: postWebhook
+      operation: POST /api/v1/webhooks
+      reversal: delete
+      reversal_operation: deleteWebhook
+      window: No deadline — a webhook can be removed at any time.
+      window_stated: true
+    - write_operation: postDisputesApprove
+      operation: POST /api/v1/disputes/approve
+      reversal: none
+      reversal_operation: null
+      window: null
+      window_stated: false
+      note: >-
+        Approving a dispute refunds the customer. The docs describe no way to reverse an approval.
+        Treat as terminal.
+    - write_operation: postDisputesChallenge
+      operation: POST /api/v1/disputes/challenge
+      reversal: none
+      reversal_operation: null
+      window: >-
+        Only disputes with status "new" can be challenged, so the opportunity closes as the dispute
+        advances; the docs state no clock in days.
+      window_stated: false
+  gaps:
+    - Refunds and dispute approvals are one-way and the docs say so — agents need explicit
+      confirmation gates before either.
+    - The 21-day missing-capture behaviour is a Tabby-side auto-capture, not a merchant reversal;
+      it shortens, rather than extends, the cancel window in practice.
+cross_links:
+  errors: errors/tabby-problem-types.yml
+  lifecycle: lifecycle/tabby-lifecycle.yml
+  authentication: authentication/tabby-authentication.yml
+  rate_limits: rate-limits/tabby-rate-limits.yml
+  sandbox: sandbox/tabby-sandbox.yml
+  data_model: data-model/tabby-data-model.yml

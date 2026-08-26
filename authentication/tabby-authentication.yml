@@ -1,14 +1,97 @@
-generated: '2026-07-11'
-method: derived
-source: openapi/tabby-api-openapi.yml
-summary:
+generated: '2026-08-26'
+method: searched
+source: https://docs.tabby.ai/introduction/technical-requirements#authentication
+docs: https://docs.tabby.ai/introduction/technical-requirements#authentication
+derived_from: openapi/_original/tabby-api-openapi.yml
+provider: Tabby
+providerId: tabby
+summary: >-
+  A single static bearer credential. Tabby issues two keys per merchant account — a secret key used
+  server-side for every Checkout, Payments, Webhooks and Disputes call, and a public key used only
+  in the browser for promo snippets. The key prefix, not the host, selects test or live. There is no
+  OAuth, no OIDC, no scopes and no key rotation surface documented.
+summary_types:
   types:
-  - http
+    - http
 schemes:
-- name: bearerAuth
-  type: http
-  scheme: bearer
-  description: Bearer authentication header of the form `Bearer <secret_key>`, where `<secret_key>`
-    is your `secret_key`.
-  sources:
-  - openapi/tabby-api-openapi.yml
+  - name: bearerAuth
+    type: http
+    scheme: bearer
+    in: header
+    header: Authorization
+    format: 'Bearer <secret_key>'
+    description: >-
+      Bearer authentication header of the form `Bearer <secret_key>`, where `<secret_key>` is your
+      secret_key.
+    applies_to: all 19 operations
+    sources:
+      - openapi/_original/tabby-api-openapi.yml
+      - https://docs.tabby.ai/introduction/technical-requirements#authentication
+credentials:
+  - name: Secret Key
+    role: server-to-server authorization
+    prefix_live: sk_
+    prefix_test: sk_test_
+    transport: Authorization header on every request
+    scope: >-
+      Bound to a merchant account. Also determines which environment a webhook registration
+      subscribes to.
+    exposure_rule: Never send to the browser or commit to version control.
+  - name: Public Key
+    role: client-side promo snippets, plans and customization
+    prefix_live: pk_
+    prefix_test: pk_test_
+    transport: Passed to TabbyPromo / TabbyCard constructors in page JavaScript
+    scope: Display only. Cannot authorize a payment operation.
+environment_selection:
+  mechanism: key-prefix
+  hosts_shared: true
+  note: >-
+    api.tabby.ai and api.tabby.sa each serve both test and live. Tabby identifies the environment
+    from the key, so a test key against the production host is the normal test path.
+issuance:
+  - path: Merchant Dashboard (merchant.tabby.ai / merchant.tabby.sa)
+    for: Self-hosted plugin integrations
+  - path: Tabby account manager, after Tabby-side QA testing is complete
+    for: Custom (Direct API) integrations
+rotation:
+  documented: false
+  note: No key rotation, expiry or revocation procedure is published.
+mtls: false
+oauth2: false
+oidc: false
+scopes:
+  present: false
+  note: >-
+    No scope or permission model exists — a secret key can call every operation the merchant account
+    is entitled to. scopes/ is intentionally absent for this provider.
+regional_note: >-
+  Keys are region-bound in practice: a key issued for a KSA merchant is used against api.tabby.sa,
+  and currency validation will reject a mismatched market (the checkout error
+  "only AED is supported, but got SAR" is exactly this).
+failure_modes:
+  - status: 401
+    errorType: not_authorized
+    messages:
+      - authorization
+      - missing Bearer scheme
+      - invalid secret key
+      - "auth: provided key doesn't exist"
+      - merchant is null
+    detail: errors/tabby-problem-types.yml
+  - status: 403
+    errorType: no_permission
+    meaning: Authenticated, but the resource does not belong to this merchant.
+transport_requirements:
+  tls_minimum: TLSv1.2
+  cipher_suites: Restricted for PCI DSS compliance; enumerated at the docs source above.
+  detail: security/tabby-domain-security.yml
+webhook_authentication:
+  inbound_to_merchant: >-
+    Optional caller-defined auth header set at webhook registration and echoed on every delivery.
+    No HMAC signature, no timestamp, no rotation. Combine with the published source-IP allowlist.
+  detail: asyncapi/tabby-webhooks.yml
+discovery:
+  well_known_openid_configuration: 404 on all hosts
+  well_known_oauth_authorization_server: 404 on all hosts
+  detail: well-known/tabby-well-known.yml

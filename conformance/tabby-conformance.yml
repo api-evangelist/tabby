@@ -1,0 +1,196 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/introduction/technical-requirements,
+  https://tabby.ai/en-AE/help-business/about-tabby/pricing,
+  https://docs.tabby.ai/marketing/approved-messaging,
+  openapi/_original/tabby-api-openapi.yml,
+  security/tabby-domain-security.yml
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby's contract is a plain OpenAPI 3.1 REST API with bearer-token auth. It adopts the general
+  data standards its payloads need (ISO 4217, ISO 8601, RFC 1766) and states PCI DSS-driven
+  cipher-suite restrictions, but it implements no API-layer standard — no OAuth 2.0, no RFC 9457
+  problem details, no JSON:API, no idempotency header, no OpenID Connect. On the domain-standard
+  axis it declares nothing: BNPL in the GCC has no interoperability contract standard comparable to
+  FDX or PSD2/OBIE in open banking, and Tabby has not adopted a neighbouring one. That is not a
+  penalty — it is an accurate reading of a market that has no such standard to adopt.
+conformance:
+  - id: openapi
+    name: OpenAPI Specification 3.1.0
+    conforms: true
+    evidence:
+      - openapi/_original/tabby-api-openapi.yml (openapi: 3.1.0, 15 paths, 19 operations, 91 schemas)
+      - https://docs.tabby.ai/openapi.yaml (HTTP 200, 133KB, published by the provider)
+  - id: rest
+    name: HTTP/REST resource semantics
+    conforms: true
+    evidence:
+      - Resource-oriented paths with GET/POST/PUT/DELETE and standard status codes across
+        /api/v2/checkout, /api/v2/payments, /api/v1/webhooks, /api/v1/disputes.
+  - id: oauth2
+    name: OAuth 2.0
+    conforms: false
+    evidence:
+      - Sole securityScheme is http/bearer carrying a static merchant secret key.
+      - /.well-known/oauth-authorization-server returns 404 on every host.
+  - id: oidc
+    name: OpenID Connect
+    conforms: false
+    evidence:
+      - /.well-known/openid-configuration returns 404 on api.tabby.ai, api.tabby.sa, docs.tabby.ai
+        and tabby.ai.
+  - id: rfc9457
+    name: RFC 9457 Problem Details for HTTP APIs
+    conforms: false
+    evidence:
+      - Errors use a custom {status, errorType, error} JSON object; no application/problem+json
+        media type appears in the spec.
+      - See errors/tabby-problem-types.yml.
+  - id: idempotency
+    name: Idempotency for unsafe HTTP methods (Idempotency-Key)
+    conforms: partial
+    evidence:
+      - Idempotency is supported on capture and refund but keyed on a request-body field
+        (reference_id), not the Idempotency-Key header.
+      - https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#idempotent-requests
+  - id: pagination
+    name: Offset/limit pagination
+    conforms: true
+    evidence:
+      - getPayments accepts offset and limit and returns a pagination object.
+      - Disputes listing is capped at 100 with no pagination controls.
+  - id: rfc8594
+    name: RFC 8594 Sunset header
+    conforms: false
+    evidence:
+      - No Sunset or Deprecation header is documented or present; no deprecation policy exists.
+  - id: rfc9116
+    name: RFC 9116 security.txt
+    conforms: false
+    evidence:
+      - /.well-known/security.txt returns 404 on all four probed hosts.
+  - id: rfc9727
+    name: RFC 9727 api-catalog
+    conforms: false
+    evidence:
+      - /.well-known/api-catalog returns 404 on all four probed hosts.
+  - id: iso4217
+    name: ISO 4217 currency codes
+    conforms: true
+    evidence:
+      - "Explicitly cited: 'We use the ISO 4217 standard for defining currencies' — AED, SAR, KWD,
+        with per-currency decimal precision (2 for AED/SAR, 3 for KWD)."
+      - https://docs.tabby.ai/introduction/technical-requirements#currency
+  - id: iso8601
+    name: ISO 8601 date/time
+    conforms: true
+    evidence:
+      - "Explicitly cited: combined date and time in UTC for all API dates; dob fields use
+        YYYY-MM-DD."
+      - https://docs.tabby.ai/introduction/technical-requirements#dates
+  - id: rfc1766
+    name: RFC 1766 language tags
+    conforms: true
+    evidence:
+      - "Explicitly cited for the lang field; en and ar supported."
+      - https://docs.tabby.ai/introduction/technical-requirements#locale
+  - id: a2a
+    name: A2A Agent Card 1.0.0
+    conforms: true
+    grade: conformant
+    evidence:
+      - https://docs.tabby.ai/.well-known/agent-card.json (HTTP 200, protocolVersion 0.3,
+        capabilities object, skills array)
+      - a2a/tabby-a2a.yml
+  - id: mcp
+    name: Model Context Protocol
+    conforms: true
+    evidence:
+      - https://docs.tabby.ai/mcp answers tools/list over Streamable HTTP with three tools and real
+        inputSchemas (probed 2026-08-26).
+      - Documentation scope only; it does not call the transaction API.
+  - id: llmstxt
+    name: llms.txt
+    conforms: true
+    evidence:
+      - https://docs.tabby.ai/llms.txt and https://docs.tabby.ai/llms-full.txt both HTTP 200 and
+        documented at https://docs.tabby.ai/introduction/ai-tools.
+domain_standards:
+  market: Buy Now Pay Later / consumer credit, GCC (KSA, UAE, Kuwait)
+  declared_in_contract: false
+  candidates_probed:
+    - id: iso20022
+      name: ISO 20022 financial messaging
+      present: false
+      note: >-
+        No ISO 20022 message types, no pain/pacs/camt shapes. Tabby's payloads are bespoke JSON
+        objects (CheckoutSession, Payment, Capture, Refund, Dispute).
+    - id: fdx
+      name: Financial Data Exchange
+      present: false
+      note: Open-banking data sharing; not applicable to a merchant-side BNPL authorization API.
+    - id: psd2-obie
+      name: PSD2 / Open Banking UK
+      present: false
+      note: EU/UK regimes; Tabby operates under CBUAE and SAMA, which publish no equivalent API standard.
+    - id: fapi
+      name: FAPI (Financial-grade API)
+      present: false
+      note: >-
+        FAPI presumes OAuth 2.0 / OIDC. Tabby uses a static bearer secret key, so FAPI's profile
+        cannot apply.
+    - id: emvco-3ds
+      name: EMVCo 3-D Secure
+      present: false
+      note: >-
+        Not applicable — Tabby authorizes against its own credit decision on a hosted page, not a
+        card network authorization the merchant orchestrates.
+  finding: >-
+    Reward-only and correctly empty. There is no BNPL contract standard in this market for Tabby to
+    declare, and no neighbouring standard it plausibly should have adopted. Nothing is invented here
+    to fill the slot.
+compliance:
+  published: true
+  certifications_published: []
+  statements:
+    - id: pci-dss-cipher-suites
+      claim: >-
+        "Strongly restricted cipher suites for compliance with the Payment Card Industry Data
+        Security Standard. Enhances payment card data security." TLS 1.2 minimum, with an
+        enumerated allowed cipher list for TLS 1.2 and TLS 1.3.
+      evidence: https://docs.tabby.ai/introduction/technical-requirements#security-protocol
+      strength: >-
+        A published control statement, not a certification. No PCI DSS Attestation of Compliance,
+        SOC 2 report, ISO 27001 certificate or trust portal is published anywhere on the Tabby
+        estate.
+    - id: cbuae-licence
+      claim: >-
+        "Tabby Cash Services are provided by Tabby Payments LLC, which is licensed by the Central
+        Bank of the UAE." Pay Later and Tabby Card (short term credit) are provided by Tabby LLC.
+      evidence: https://tabby.ai/en-AE/help-business/about-tabby/pricing (site footer, all pages)
+      regime: CBUAE (UAE)
+    - id: sama-supervision
+      claim: >-
+        "Tabby Financing Company JSC is subject to the control and supervision of the Saudi Central
+        Bank."
+      evidence: https://docs.tabby.ai/marketing/approved-messaging
+      regime: SAMA (KSA)
+    - id: shariah-compliance
+      claim: Tabby's KSA offering is stated as Shariah-compliant, with zero interest and zero late fees.
+      evidence: https://docs.tabby.ai/marketing/approved-messaging
+  transport_security:
+    tls_minimum: TLSv1.2
+    observed: TLSv1.3 on tabby.ai, docs.tabby.ai and api.tabby.ai
+    hsts: true (tabby.ai max-age 31536000, docs.tabby.ai max-age 63072000)
+    dnssec: true
+    caa: present
+    evidence: security/tabby-domain-security.yml
+  gaps:
+    - No trust centre or compliance portal (trust.tabby.ai does not resolve).
+    - No named third-party audit artefacts (SOC 2, ISO 27001, PCI AOC).
+    - No published vulnerability disclosure policy or bug bounty — hackerone.com/tabby and
+      bugcrowd.com/tabby both returned 404 on 2026-08-26, no security.txt is served on any host, and
+      probe-security-programs.py found no disclosure page. No Security or TrustCenter pointer is
+      wired for Tabby as a result.

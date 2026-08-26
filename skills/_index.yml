@@ -1,0 +1,70 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/.well-known/agent-skills/tabby/skill.md (provider-published, saved verbatim)
+  plus four flow skills generated from openapi/_original/tabby-api-openapi.yml
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby publishes its own Agent Skill and advertises it from the A2A agent card at
+  /.well-known/agent-card.json — one of the few providers in the catalog doing both. That skill is
+  saved here verbatim. Alongside it are four marquee-flow skills generated from the OpenAPI, each
+  grounded in verified operationIds and carrying the conventions, error semantics, idempotency and
+  reversal windows an agent needs before it acts.
+skills:
+  - file: tabby-integration.md
+    name: Tabby
+    method: searched
+    source: https://docs.tabby.ai/.well-known/agent-skills/tabby/skill.md
+    http_status: 200
+    verbatim: true
+    advertised_by: a2a/tabby-agent-card.json (skills[0].url)
+    scope: >-
+      Whole-product integration skill: product summary, endpoint quick reference, payment statuses,
+      test credentials, webhook security, decision guidance and platform-plugin routing.
+    defects_observed:
+      - >-
+        The endpoint table gives webhooks as `/api/v2/webhooks` with PATCH. The published OpenAPI and
+        API reference put them at `/api/v1/webhooks` with PUT. Follow the spec, not the skill, on
+        this one line.
+  - file: tabby-checkout-to-capture.md
+    name: tabby-checkout-to-capture
+    method: generated
+    operations: [postCheckoutSession, getPayment, postPaymentCapture, closePayment]
+    scope: >-
+      Session creation and eligibility, redirect contract, server-to-server verification, catching
+      buyers who never return, full capture, and close-as-cancel.
+  - file: tabby-refund-and-cancel.md
+    name: tabby-refund-and-cancel
+    method: generated
+    operations: [getPayment, postPaymentRefund, closePayment, putPayment]
+    scope: >-
+      Choosing between close and refund, the 180-day refund window, the idempotency key, and the
+      irreversibility of a processed refund.
+  - file: tabby-webhook-intake.md
+    name: tabby-webhook-intake
+    method: generated
+    operations: [postWebhook, getWebhooks, getWebhook, putWebhook, deleteWebhook]
+    scope: >-
+      Registration scope and the 4-endpoint cap, the seven payment events, retry and ordering
+      semantics, deduplication without an event id, the source-IP allowlist, and the unmanaged
+      dispute-webhook channel.
+  - file: tabby-dispute-response.md
+    name: tabby-dispute-response
+    method: generated
+    operations: [getDisputes, getDispute, postUploadAttachment, postDisputeProvideEvidence, postDisputesApprove, postDisputesChallenge]
+    scope: >-
+      The 100-dispute listing cap, days_left as the clock, the 20-per-request batch caps, evidence
+      upload constraints, and the irreversibility of an approval.
+grounding:
+  spec: openapi/_original/tabby-api-openapi.yml
+  operationIds_verified: true
+  note: >-
+    Every operationId referenced in the four generated skills was grepped from the spec. No operation
+    name was invented.
+conventions_referenced:
+  - conventions/tabby-conventions.yml
+  - errors/tabby-problem-types.yml
+  - rate-limits/tabby-rate-limits.yml
+  - sandbox/tabby-sandbox.yml
+  - asyncapi/tabby-webhooks.yml

@@ -4,16 +4,27 @@ schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main
 provider: Tabby
 providerId: tabby
 created: '2026-05-24'
-modified: '2026-05-24'
+modified: '2026-08-26'
 reconciled: true
+generated: '2026-08-26'
+method: searched
+source: https://tabby.ai/en-AE/help-business/about-tabby/pricing
+plan_count: 3
+rates_published: false
 tags:
   - BNPL
   - Payments
   - MENA
-description: 'Tabby merchant commercial model. Tabby earns primarily via a merchant discount rate (MDR) charged
-  on each successful BNPL transaction, plus a fixed fee per order. End-buyers pay zero interest on Pay-in-4
-  and zero late fees in KSA (Shariah compliant). Specific MDR and fixed-fee values are negotiated per
-  merchant in the signed contract. Industry observed range: ~3-8% MDR depending on vertical and volume.'
+description: >-
+  Tabby publishes the SHAPE of its merchant pricing but no numbers. Its own pricing page states two
+  components — "a variable commission rate" that "may differ from one merchant to another based on
+  factors such as industry and business profile", and "a fixed fee per transaction" — with the exact
+  rate specified in the signed contract. Both fees are stated to already include payment gateway
+  charges, with no hidden or additional costs, and there are no advance payments to integrate. No
+  self-serve tier and no published rate card exist: every merchant is on a negotiated contract.
+  End-buyers pay zero interest on Pay-in-4 and zero late fees in KSA (Shariah compliant).
+  Verified 2026-08-26 against the pricing page (HTTP 200); no percentage or fee figure appears
+  anywhere on Tabby's public surface, so none is recorded here.
 sources:
   - https://tabby.ai/en-AE/help-business/about-tabby/pricing
   - https://tabby.ai/en-AE/business
@@ -35,8 +46,10 @@ plans:
         unit: 1
         price: 'Custom'
         userMultiplied: false
-        description: 'Variable commission applied per transaction. Typically 3-8% depending on industry,
-          volume, and merchant profile. Specified in your Tabby contract.'
+        description: >-
+          Variable commission applied per transaction. Tabby states the rate differs by merchant
+          based on industry and business profile and is specified in the signed contract. No figure
+          or range is published; none is asserted here.
       - label: Fixed per-transaction fee
         name: fixed_fee
         type: metered

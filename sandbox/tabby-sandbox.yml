@@ -1,0 +1,116 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/testing-guidelines/testing-credentials,
+  https://docs.tabby.ai/pay-in-4-custom-integration/full-testing-checklist,
+  https://docs.tabby.ai/testing-guidelines/postman-api-collections,
+  https://docs.tabby.ai/introduction/technical-requirements
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby has no separate sandbox host. Test and live run on the same base URLs and the environment is
+  decided entirely by the key prefix. Test behaviour is driven by magic buyer identifiers — a set of
+  published email addresses and phone numbers that deterministically force approval, pre-scoring
+  rejection or post-OTP rejection — plus a fixed OTP. Full testing against these values is mandatory
+  before go-live for Custom API and Salesforce Commerce Cloud integrations.
+mode_selection:
+  mechanism: key-prefix
+  same_host_as_production: true
+  hosts:
+    - https://api.tabby.ai
+    - https://api.tabby.sa
+  keys:
+    - env: test
+      secret_prefix: sk_test_
+      public_prefix: pk_test_
+    - env: live
+      secret_prefix: sk_
+      public_prefix: pk_
+  note: >-
+    Webhooks are registered per environment implicitly: registering with a test key subscribes test
+    payments, registering with a live key subscribes production payments.
+test_identifiers:
+  description: >-
+    Published magic values. The email selects the OTP outcome; the phone number selects the
+    pre-scoring outcome. Country prefix selects the market.
+  otp: '8888'
+  scenarios:
+    - id: payment-success
+      outcome: Payment authorized, then captured and CLOSED.
+      email: otp.success@tabby.ai
+      phones:
+        UAE: '+971500000001'
+        KSA: '+966500000001'
+        Kuwait: '+96590000001'
+    - id: background-prescoring-reject
+      outcome: >-
+        Tabby is hidden or marked unavailable at checkout — the buyer never reaches the Tabby page.
+      email: otp.success@tabby.ai
+      phones:
+        UAE: '+971500000002'
+        KSA: '+966500000002'
+        Kuwait: '+96590000002'
+    - id: payment-cancellation
+      outcome: >-
+        Buyer aborts on the Tabby hosted page; redirect to the Cancel URL, cart must not be emptied.
+      email: otp.success@tabby.ai
+      phones:
+        UAE: '+971500000001'
+        KSA: '+966500000001'
+        Kuwait: '+96590000001'
+    - id: payment-failure
+      outcome: >-
+        Rejection screen after OTP; redirect to the Failure URL; payment status REJECTED and no
+        order in Merchant Dashboard.
+      email: otp.rejected@tabby.ai
+      phones:
+        UAE: '+971500000001'
+        KSA: '+966500000001'
+        Kuwait: '+96590000001'
+test_cards: null
+test_bank_accounts: null
+time_simulation:
+  supported: false
+  note: >-
+    No test clocks. The 20-minute session expiry, the ~30-minute payment expiry, the 21-day
+    missing-capture grace and the 180-day refund window cannot be fast-forwarded in test.
+coverage_gaps:
+  - Disputes have no test mode at all — the Disputes API and dispute webhooks operate exclusively on
+    live payments with live credentials.
+  - No hosted request console beyond the API playground embedded in the reference pages.
+  - No fixture/trigger tooling to force a specific webhook event; events must be produced by driving
+    a real test checkout.
+tooling:
+  postman_collection:
+    url: https://docs.tabby.ai/custom-api.json
+    http_status: 200
+    name: Tabby Pay in 4 API collection
+    saved: collections/tabby-custom-api.postman_collection.json
+    variables:
+      - base_url
+      - secret_key
+      - merchant_code
+      - currency
+    docs: https://docs.tabby.ai/testing-guidelines/postman-api-collections
+  api_playground:
+    url: https://docs.tabby.ai/api-reference/overview
+    note: Try-it console rendered on each reference page; requires a real secret key.
+  redoc_view: https://redocly.github.io/redoc/?url=https://docs.tabby.ai/openapi.yaml
+go_live:
+  testing_required_for:
+    - Custom (Direct API) integrations
+    - Salesforce Commerce Cloud integrations
+  testing_optional_for:
+    - Magento 2
+    - OpenCart
+  not_required_for: All other certified plugin integrations — launch with live keys.
+  live_key_issuance:
+    - Merchant Dashboard, for self-hosted plugin integrations.
+    - Tabby account manager after Tabby-side QA, for Custom API integrations.
+  checklist: https://docs.tabby.ai/pay-in-4-custom-integration/full-testing-checklist
+constraints:
+  - Performance, load and stress testing against production APIs is prohibited; exclude Tabby from
+    the checkout when running them.
+  - Test keys are rate limited to 10 Create Session operations per 10 seconds and 50 requests per
+    second for other operations.
+  - Keys and IPs exceeding limits may be firewalled automatically or limited manually on detection.

@@ -1,0 +1,97 @@
+overlay: 1.0.0
+info:
+  title: Tabby Payments API — API Evangelist enrichment overlay
+  version: 1.0.0
+  x-generated: '2026-08-26'
+  x-method: generated
+  x-source: openapi/tabby-payments-api-openapi.yml
+  x-note: >-
+    Captures runtime semantics Tabby publishes in its documentation but does not express in the
+    contract — rate limits, idempotency, reversal windows, environment selection and webhook
+    delivery guarantees. Applies to openapi/tabby-payments-api-openapi.yml; the original spec is never mutated.
+extends: openapi/tabby-payments-api-openapi.yml
+actions:
+  - target: $.info
+    description: Record the region-specific base URLs and the API Evangelist enrichment provenance.
+    update:
+      x-api-evangelist:
+        enriched: '2026-08-26'
+        repo: https://github.com/api-evangelist/tabby
+        conventions: conventions/tabby-conventions.yml
+        errors: errors/tabby-problem-types.yml
+        rate_limits: rate-limits/tabby-rate-limits.yml
+        sandbox: sandbox/tabby-sandbox.yml
+        data_model: data-model/tabby-data-model.yml
+      x-regions:
+        - region: UAE, Kuwait
+          api: https://api.tabby.ai
+          checkout: https://checkout.tabby.ai
+          dashboard: https://merchant.tabby.ai
+        - region: KSA
+          api: https://api.tabby.sa
+          checkout: https://checkout.tabby.sa
+          dashboard: https://merchant.tabby.sa
+  - target: $
+    description: >-
+      Record the rate limits Tabby publishes in prose but does not express in the contract, and the
+      429 response the spec never declares.
+    update:
+      x-rate-limits:
+        source: https://docs.tabby.ai/introduction/technical-requirements#rate-limit
+        scope: per-api-key, per-operation-class
+        exhaustion_status: 429
+        response_headers: none
+        live:
+          create_session: 200 per 10s
+          other: 100 per 1s
+        test:
+          create_session: 10 per 10s
+          other: 50 per 1s
+  - target: $.components.securitySchemes.bearerAuth
+    description: Clarify the key prefixes that select environment, which the description omits.
+    update:
+      x-key-prefixes:
+        live_secret: sk_
+        test_secret: sk_test_
+        live_public: pk_
+        test_public: pk_test_
+      x-environment-selection: >-
+        Environment is chosen by the key, not by the host. The same base URL serves test and live.
+  - target: $.paths['/api/v2/payments/{id}/captures'].post
+    description: Record the documented idempotency mechanism and the reversal path.
+    update:
+      x-idempotent: true
+      x-idempotency-key-field: reference_id
+      x-idempotency-source: https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#idempotent-requests
+      x-reversal:
+        operationId: postPaymentRefund
+        window: within 180 days of payment creation
+      x-preconditions: Payment status must be AUTHORIZED; other statuses return 400.
+      x-agentic-consequence: moves-money
+  - target: $.paths['/api/v2/payments/{id}/refunds'].post
+    description: Record idempotency and the irreversibility of a processed refund.
+    update:
+      x-idempotent: true
+      x-idempotency-key-field: reference_id
+      x-reversal: none
+      x-irreversible: true
+      x-irreversible-note: A processed refund cannot be cancelled.
+      x-preconditions: >-
+        Payment must be CLOSED; refund total cannot exceed the captured amount; within 180 days of
+        payment creation.
+      x-agentic-consequence: moves-money
+  - target: $.paths['/api/v2/payments/{id}/close'].post
+    description: Record close-as-cancel semantics and the 21-day Tabby-side auto-capture.
+    update:
+      x-reversal-of: authorization
+      x-window: >-
+        Closing without capture cancels the payment. Tabby leaves a non-captured AUTHORIZED payment
+        untouched for 21 days, after which it may capture the remaining amount in full on its side.
+      x-agentic-consequence: moves-money
+  - target: $.paths['/api/v2/payments/{id}'].put
+    description: Record that only order.reference_id is mutable.
+    update:
+      x-mutable-fields:
+        - order.reference_id
+      x-note: Other fields sent in the request are silently ignored.
+      x-agentic-consequence: metadata-only

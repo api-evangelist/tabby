@@ -1,0 +1,164 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/pay-in-4-custom-integration/webhooks,
+  https://docs.tabby.ai/pay-in-4-custom-integration/dispute-webhooks,
+  https://docs.tabby.ai/api-reference/webhooks/register-a-webhook,
+  openapi/_original/tabby-api-openapi.yml
+provider: Tabby
+providerId: tabby
+kind: webhook-catalog
+asyncapi_published: false
+asyncapi_probe:
+  - url: https://docs.tabby.ai/asyncapi.yaml
+    status: not-probed
+    note: >-
+      Tabby publishes no AsyncAPI. The event surface is documented in prose and in the OpenAPI's
+      Webhook schemas; no event-spec file is referenced anywhere in the docs, the llms.txt index or
+      the GitHub org. No AsyncAPI pointer is wired.
+summary: >-
+  Tabby ships a real, well-documented webhook surface with two independent channels. Payment
+  webhooks are merchant-managed through /api/v1/webhooks. Dispute webhooks share the same delivery
+  machinery but cannot be managed through the API at all — they are enabled by the Integrations Team
+  on request. Delivery is at-least-once and unordered, with an explicit retry policy and a published
+  source-IP allowlist.
+transport:
+  protocol: HTTPS POST
+  content_type: application/json
+  subscriber_endpoint: merchant-supplied HTTPS URL
+  acknowledgement: HTTP 200
+  timeout_seconds: 60
+  retries: 4
+  retry_interval_minutes:
+    min: 1
+    max: 4
+    strategy: exponential
+  ordering_guarantee: none
+  delivery_semantics: at-least-once (duplicates possible)
+  authentication:
+    mechanism: optional caller-defined header
+    detail: >-
+      An optional auth header supplied at registration is echoed on every delivery so the receiver
+      can verify authenticity. There is no HMAC signature, no timestamp, and no signing-secret
+      rotation scheme.
+  source_ip_allowlist:
+    - 34.166.36.90
+    - 34.166.35.211
+    - 34.166.34.222
+    - 34.166.37.207
+    - 34.93.76.191
+    - 34.166.128.182
+    - 34.166.170.3
+    - 34.166.249.7
+channels:
+  - id: payment-webhooks
+    name: Payment webhooks
+    managed_via_api: true
+    operations:
+      register: postWebhook
+      list: getWebhooks
+      retrieve: getWebhook
+      update: putWebhook
+      remove: deleteWebhook
+    registration_scope: per merchant_code + secret key pair
+    max_endpoints: 4
+    environment_selection: >-
+      Determined by the key used to register — sk_ registers production payments, sk_test_ registers
+      test payments.
+    payload_schema: Webhook (openapi/_original/tabby-api-openapi.yml#/components/schemas/Webhook)
+    payload_fields:
+      - id
+      - created_at
+      - expires_at
+      - closed_at
+      - status
+      - is_test
+      - is_expired
+      - amount
+      - currency
+      - order.reference_id
+      - captures[]
+      - refunds[]
+      - meta.order_id
+      - meta.customer
+      - token
+    status_case: lowercase (authorized), unlike the uppercase statuses returned by getPayment
+    events:
+      - event: Authorize
+        payload_status: authorized
+        change: '"status": "authorized"'
+        merchant_action: >-
+          Process the order in your OMS if not already processed, then send the Capture request.
+          This is the most reliable way to catch payments where the buyer never returned to the site.
+      - event: Capture
+        payload_status: authorized
+        change: capture info appended to captures[]
+        merchant_action: none
+      - event: Close
+        payload_status: closed
+        change: '"status": "closed" and closed_at updated'
+        merchant_action: none
+      - event: Reject
+        payload_status: rejected
+        change: '"status": "rejected"'
+        merchant_action: Cancel or delete the order in your OMS.
+      - event: Expire
+        payload_status: expired
+        change: '"status": "expired", expired_at and is_expired updated'
+        optional: true
+        merchant_action: Cancel the order. Must be enabled by the Tabby team on request.
+      - event: Refund
+        payload_status: closed
+        change: refund info appended to refunds[]
+        merchant_action: none
+      - event: Update
+        payload_status: unchanged
+        change: order.reference_id updated
+        merchant_action: none
+    typical_sequence:
+      - authorized
+      - authorized (with capture appended)
+      - closed
+  - id: dispute-webhooks
+    name: Dispute webhooks
+    managed_via_api: false
+    enablement: >-
+      Cannot be registered through the API. Ask the Tabby Integrations Team to enable them for your
+      merchant_code and supply the endpoint URL.
+    environment: live only — disputes have no test mode
+    payload_fields:
+      - status
+      - dispute_id
+      - payment_id
+      - amount
+      - currency
+      - created_at
+    deduplication_key: dispute_id + status
+    events:
+      - status: pending
+        meaning: The customer opened a dispute on your payment.
+      - status: arbitration
+        meaning: You challenged the dispute and it moved to arbitration.
+      - status: evidence_merchant
+        meaning: Tabby support requested supporting evidence from you.
+      - status: approved
+        meaning: The dispute was approved and the amount was refunded to the customer.
+      - status: declined
+        meaning: The dispute was declined by Tabby support.
+      - status: cancelled
+        meaning: The dispute was cancelled by the customer.
+    follow_up_operation: getDispute (GET /api/v1/disputes/{disputeId}) for full detail
+best_practices:
+  - Acknowledge with 200 immediately and process asynchronously.
+  - Handle out-of-order delivery with a state machine; a capture event can arrive before its
+    authorization event.
+  - Deduplicate — the same event may be delivered twice.
+  - Filter: you receive every payment event, not only the ones you care about.
+  - Allowlist the eight source IPs at your edge.
+  - Compare statuses case-insensitively against API responses.
+gaps:
+  - No AsyncAPI or other machine-readable event contract.
+  - No HMAC signing — authenticity rests on an optional static header and IP allowlisting.
+  - Dispute webhooks are unmanageable through the API and untestable in any environment.
+  - No event id or delivery id distinct from the payment id, so deduplication for payment webhooks
+    must key on (payment id, status, captures/refunds length).

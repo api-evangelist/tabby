@@ -1,0 +1,201 @@
+generated: '2026-08-26'
+method: derived
+source: >-
+  openapi/_original/tabby-api-openapi.yml (4xx/5xx responses) enriched from
+  https://docs.tabby.ai/introduction/technical-requirements#errors and
+  https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing
+provider: Tabby
+providerId: tabby
+format: custom-json
+rfc9457: false
+content_type: application/json
+summary: >-
+  Tabby returns a custom JSON error object, not RFC 9457 problem+json. The machine-readable field is
+  errorType; error is a human-readable English string the docs say is "never meant to be in any way
+  parsed by the client". The OpenAPI declares 22 distinct error schemas across 19 operations, which
+  makes the surface unusually well specified for a provider that never adopted a standard envelope.
+envelope:
+  fields:
+    - name: status
+      type: string
+      always: error
+    - name: errorType
+      type: string
+      note: The machine-readable error class. Match on this, never on `error`.
+    - name: error
+      type: string
+      note: >-
+        Human-readable English message for logs and debugging. Not displayable to end users and not
+        machine-parseable.
+    - name: errors
+      type: array
+      note: Some responses return an array of messages instead of a single `error` string.
+  correlation_id:
+    documented: true
+    field_name: undocumented
+    note: >-
+      The errors section states the body contains "a unique correlation ID to identify the request",
+      but neither the field name nor a response header is specified anywhere in the docs or the spec.
+  exceptions:
+    - status: 404
+      shape: bare string
+      example: 404 page not found
+    - status: 500
+      shape: bare string
+      example: Internal Server error
+error_types:
+  - errorType: bad_data
+    status: 400
+    meaning: The request could not be decoded, or a field failed validation.
+    remediation: >-
+      Check field formats against /introduction/technical-requirements — amounts as strings with the
+      currency's decimal count, ISO 8601 dates, 255-character string cap, UTF-8 encoding.
+  - errorType: not_authorized
+    status: 401
+    meaning: Missing, malformed or unknown secret key.
+    remediation: >-
+      Send `Authorization: Bearer <secret_key>`. Confirm the key matches the region host and the
+      environment (sk_test_ against test, sk_ against live).
+  - errorType: no_permission
+    status: 403
+    meaning: The authenticated merchant may not act on this resource.
+    remediation: Confirm the payment or webhook belongs to the merchant_code the key is scoped to.
+  - errorType: not_found
+    status: 404
+    meaning: No such payment, webhook or dispute.
+    remediation: Verify the id, and that you are calling the region host the payment was created on.
+  - errorType: conflict
+    status: 409
+    meaning: The resource is in a state that forbids the operation (e.g. the payment is disputed).
+    remediation: Re-read the payment/dispute state before retrying; do not retry blindly.
+problem_types:
+  - id: checkout-create-bad-data
+    status: 400
+    errorType: bad_data
+    operations: [postCheckoutSession]
+    example_message: "could not create payment: only AED is supported, but got SAR"
+    title: Checkout session rejected on validation
+    remediation: >-
+      The currency must match the merchant_code's configured market. Use api.tabby.ai for AED/KWD
+      merchants and api.tabby.sa for SAR merchants.
+  - id: request-decode-failed
+    status: 400
+    errorType: bad_data
+    operations: [postCheckoutSession, postWebhook, putWebhook, putPayment]
+    example_message: could not decode request / failed to decode request / bad_request
+    title: Request body could not be decoded
+    remediation: Send well-formed JSON with Content-Type application/json.
+  - id: payment-id-invalid
+    status: 400
+    errorType: bad_data
+    operations: [getPayment, getPayments]
+    example_message: invalid payment id
+    title: Malformed payment identifier
+    remediation: Use the payment.id returned at session creation, verbatim.
+  - id: capture-not-authorized
+    status: 400
+    errorType: bad_data
+    operations: [postPaymentCapture]
+    example_message: could not capture not authorized payments
+    title: Capture attempted on a payment that is not AUTHORIZED
+    remediation: >-
+      Only an AUTHORIZED payment can be captured. Capture attempts in CREATED, EXPIRED, CLOSED or
+      REJECTED return 400. Retrieve the payment and check status first.
+  - id: refund-not-refundable
+    status: 400
+    errorType: bad_data
+    operations: [postPaymentRefund]
+    example_message: can not refund payment that has no captures and not closed
+    title: Refund attempted on a payment that is not CLOSED with captures
+    remediation: >-
+      Only a CLOSED payment can be refunded, and the refund total cannot exceed the captured amount.
+      Refunds must be initiated within 180 days of payment creation.
+  - id: payment-already-closed
+    status: 400
+    errorType: bad_data
+    operations: [closePayment]
+    example_message: already closed
+    title: Close attempted on an already-closed payment
+    remediation: Closing is idempotent in effect but not in response — check status before calling.
+  - id: authorization-missing
+    status: 401
+    errorType: not_authorized
+    operations: [all]
+    example_message: authorization / missing Bearer scheme
+    title: Authorization header missing or not a Bearer scheme
+    remediation: "Send `Authorization: Bearer <secret_key>`."
+  - id: secret-key-invalid
+    status: 401
+    errorType: not_authorized
+    operations: [all]
+    example_message: "invalid secret key / auth: provided key doesn't exist"
+    title: Secret key not recognised
+    remediation: >-
+      Live keys come from Merchant Dashboard (self-hosted plugins) or your Tabby account manager
+      (custom API integrations, after QA).
+  - id: merchant-null
+    status: 401
+    errorType: not_authorized
+    operations: [all]
+    example_message: merchant is null
+    title: Key resolves to no merchant
+    remediation: Contact Tabby Partner Support — the key is orphaned from a merchant_code.
+  - id: no-permission
+    status: 403
+    errorType: no_permission
+    operations: [postCheckoutSession, getCheckoutSession, putPayment, postPaymentCapture, postPaymentRefund, closePayment, putWebhook]
+    title: Forbidden for this merchant
+    remediation: Confirm the resource belongs to the authenticated merchant.
+  - id: no-such-payment
+    status: 404
+    errorType: not_found
+    operations: [getPayment, putPayment, postPaymentCapture, postPaymentRefund, closePayment]
+    example_message: no such payment
+    title: Payment not found
+    remediation: Check the id and the region host.
+  - id: no-such-webhook
+    status: 404
+    errorType: not_found
+    operations: [getWebhook, putWebhook, deleteWebhook, getWebhooks, postWebhook]
+    example_message: no such webhook
+    title: Webhook not found
+    remediation: List webhooks for the merchant_code + key pair and use a returned id.
+  - id: dispute-not-found
+    status: 404
+    errorType: not_found
+    operations: [getDispute, postDisputeProvideEvidence, postDisputesApprove, postDisputesChallenge]
+    example_message: dispute not found
+    title: Dispute not found
+    remediation: >-
+      Disputes operate on live payments with live credentials only — a test key will never find a
+      dispute.
+  - id: payment-disputed
+    status: 409
+    errorType: conflict
+    operations: [postPaymentRefund, postDisputeProvideEvidence]
+    example_message: payment is disputed
+    title: Conflicting state
+    remediation: >-
+      A disputed payment cannot be refunded through the Payments API — resolve it through the
+      Disputes API instead.
+  - id: internal-error
+    status: 500
+    errorType: null
+    operations: [all]
+    example_message: Internal Server error
+    title: Tabby-side failure
+    remediation: >-
+      Check https://www.tabby-status.com/. If Checkout or Payments are affected across all
+      countries, disable Tabby at checkout until the incident clears. Do not blind-retry captures or
+      refunds without a reference_id.
+counts:
+  operations_with_error_responses: 19
+  distinct_error_schemas: 22
+  status_codes: [400, 401, 403, 404, 409, 500]
+gaps:
+  - No RFC 9457 application/problem+json envelope.
+  - errorType values are not enumerated anywhere as a closed list; they are only observable from
+    per-operation examples.
+  - The documented correlation ID has no named field or header.
+  - No 429 response is declared in the OpenAPI even though the docs state 429 is returned on rate
+    limiting.

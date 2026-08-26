@@ -1,0 +1,103 @@
+generated: '2026-08-26'
+method: probed
+source: https://docs.tabby.ai/mcp
+provider: Tabby
+providerId: tabby
+name: Tabby Docs MCP Server
+summary: >-
+  Tabby ships an official hosted MCP server over its documentation. It is documented at
+  https://docs.tabby.ai/introduction/ai-tools with copy-paste Cursor and Claude Code configs, and
+  answers tools/list anonymously. Tabby states explicitly that the server "covers the documentation
+  only. It does not call the Tabby API or move money" — so this is a retrieval surface over the
+  integration guide and the OpenAPI spec, not an agent surface onto Checkout/Payments/Disputes.
+deployment:
+  mode: remote
+  endpoint: https://docs.tabby.ai/mcp
+  auth: none
+  verified: probed
+x-evidence:
+  fetched: '2026-08-26'
+  url: https://docs.tabby.ai/mcp
+  method: POST
+  request: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+  http_status: 200
+  content_type: text/event-stream
+  tools_returned: 3
+transport:
+  protocol: Streamable HTTP
+  accept: application/json, text/event-stream
+  sse_endpoint_probe:
+    url: https://docs.tabby.ai/sse
+    status: 405
+client_config:
+  cursor: |
+    {
+      "mcpServers": {
+        "tabby-docs": {
+          "url": "https://docs.tabby.ai/mcp"
+        }
+      }
+    }
+  claude_code: claude mcp add --transport http tabby-docs https://docs.tabby.ai/mcp
+docs: https://docs.tabby.ai/introduction/ai-tools
+tools:
+  - name: search_tabby
+    title: Search documentation
+    description: >-
+      Search across the Tabby knowledge base to find relevant information, code examples, API
+      references, and guides.
+    inputSchema:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Search query
+        language:
+          type: string
+          description: "Filter to specific language code (e.g., 'zh', 'es'). Defaults to 'en'"
+      additionalProperties: false
+  - name: query_docs_filesystem_tabby
+    description: >-
+      Run a read-only shell-like query against a virtualized, in-memory filesystem rooted at / that
+      contains ONLY the Tabby documentation pages and OpenAPI specs. Nothing runs on a real machine.
+    inputSchema:
+      type: object
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          description: >-
+            A shell command to run against the virtualized documentation filesystem
+            (e.g. `rg -il "keyword" /`, `tree / -L 2`, `head -80 /path/file.mdx`).
+      additionalProperties: false
+  - name: submit_feedback
+    title: Submit documentation feedback
+    description: >-
+      Report a problem with this documentation site so the docs team can fix it.
+    inputSchema:
+      type: object
+      required:
+        - path
+        - feedback
+      properties:
+        path:
+          type: string
+          minLength: 1
+          description: The documentation page path the feedback is about.
+        feedback:
+          type: string
+          minLength: 1
+          description: A clear description of the documentation issue or suggestion.
+      additionalProperties: false
+notes:
+  - The server is anonymous — no OAuth challenge was returned and no /.well-known/oauth-protected-resource
+    or /.well-known/oauth-authorization-server document is served on docs.tabby.ai (both 404).
+  - No MCP server exists over the transaction API. Every money-moving operation still requires a
+    direct REST call to api.tabby.ai / api.tabby.sa with a Bearer secret key.
+  - The A2A agent card at /.well-known/agent-card.json describes the same documentation surface.
+related:
+  crosswalk: mcp/tabby-tool-crosswalk.yml
+  agent_card: a2a/tabby-a2a.yml

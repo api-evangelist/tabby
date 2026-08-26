@@ -1,0 +1,72 @@
+# Tabby
+
+## Docs
+
+- [What is Tabby?](https://docs.tabby.ai/introduction/what-is-tabby.md)
+- [Technical Requirements](https://docs.tabby.ai/introduction/technical-requirements.md)
+- [F.A.Q.](https://docs.tabby.ai/introduction/faq.md)
+- [Quick Start](https://docs.tabby.ai/introduction/quick-start.md)
+- [Tabby docs for AI & LLMs](https://docs.tabby.ai/introduction/ai-tools.md): Use the Tabby documentation with ChatGPT, Claude, Cursor and other AI tools — via llms.txt, per-page Markdown, and the hosted MCP server.
+- [Shopify Plugin Installation](https://docs.tabby.ai/e-commerce-platforms/shopify/shopify-plugin-installation.md): Install the Tabby app for Shopify, configure webhooks and settings, and go live.
+- [Shopify Snippets](https://docs.tabby.ai/e-commerce-platforms/shopify/shopify-snippets.md): Add Tabby promotional snippets to your Shopify product and cart pages.
+- [Shopify Product Catalogue](https://docs.tabby.ai/product-catalogue/shopify-product-catalogue.md)
+- [Salla](https://docs.tabby.ai/e-commerce-platforms/salla.md)
+- [Zid](https://docs.tabby.ai/e-commerce-platforms/zid.md)
+- [Zid Product Catalogue](https://docs.tabby.ai/product-catalogue/zid-product-catalogue.md)
+- [WooCommerce Plugin Installation](https://docs.tabby.ai/e-commerce-platforms/woocommerce/woocommerce-plugin-installation.md): Install the Tabby plugin for WooCommerce, configure your API keys, and go live.
+- [WooCommerce Product Catalogue](https://docs.tabby.ai/e-commerce-platforms/woocommerce/woocommerce-product-catalogue.md): Enable the WooCommerce Product Catalogue feature to list your store's products on the Tabby Shop.
+- [Magento 2 Plugin Installation](https://docs.tabby.ai/e-commerce-platforms/magento-2/magento-2-plugin-installation.md): Install the Tabby plugin for Magento 2, configure your API keys, and connect to the live environment.
+- [Magento 2 Product Catalogue](https://docs.tabby.ai/e-commerce-platforms/magento-2/magento-2-product-catalogue.md): Enable the Magento 2 Product Catalogue feature to list your store's products on the Tabby Shop.
+- [OpenCart Plugin Installation](https://docs.tabby.ai/e-commerce-platforms/opencart/opencart-plugin-installation.md): Install the Tabby plugin for OpenCart, configure your API keys, and connect to the live environment.
+- [OpenCart Product Catalogue](https://docs.tabby.ai/e-commerce-platforms/opencart/opencart-product-catalogue.md): Enable the OpenCart Product Catalogue feature to list your store's products on the Tabby Shop.
+- [Odoo Plugin Installation](https://docs.tabby.ai/e-commerce-platforms/odoo/odoo-plugin-installation.md): Install the Tabby module on Odoo, configure your API keys, and take the integration live.
+- [Matjrah](https://docs.tabby.ai/e-commerce-platforms/matjrah.md): Connect Tabby on the Matjrah platform by entering your API keys.
+- [Salesforce](https://docs.tabby.ai/e-commerce-platforms/salesforce.md): Install and configure the Tabby cartridge for Salesforce Commerce Cloud.
+- [ExpandCart](https://docs.tabby.ai/e-commerce-platforms/expandcart.md): Install and configure the Tabby payment method on ExpandCart using your API keys.
+- [Quick Start](https://docs.tabby.ai/pay-in-4-custom-integration/quick-start.md)
+- [Checkout Flow](https://docs.tabby.ai/pay-in-4-custom-integration/checkout-flow.md)
+- [Payment Statuses](https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses.md): How a Tabby payment moves through its lifecycle, and how API statuses map to what you see on Merchant Dashboard.
+- [Payment Processing](https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing.md): What to do after the customer completes the Tabby checkout: verify the payment, capture it, and process refunds when needed.
+- [Disputes](https://docs.tabby.ai/pay-in-4-custom-integration/disputes.md): Handle customer disputes programmatically with the Disputes API.
+- [Payment webhooks](https://docs.tabby.ai/pay-in-4-custom-integration/webhooks.md): Get notified about payment status changes: registration, payload, supported events, delivery order, and retries.
+- [Dispute webhooks](https://docs.tabby.ai/pay-in-4-custom-integration/dispute-webhooks.md): Get notified when a dispute is opened on your payment and when its status changes: payload, statuses, and delivery.
+- [On‑Site Messaging](https://docs.tabby.ai/pay-in-4-custom-integration/on-site-messaging.md)
+- [Mobile App SDKs](https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/sdk-all.md): Native SDKs for iOS, Android, Flutter, and React Native: checkout initialisation and promo snippets.
+- [Integration without SDK (WebView)](https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/integration-without-sdk.md): Open the Tabby checkout in your mobile app without our SDK: how to render it, read the payment status correctly, and recover from corner cases.
+- [App Promo Messaging](https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/app-promo-messaging.md): Promo messaging in mobile apps: SDK snippet components, or custom snippets with the standard copy and Tabby pop-up URLs.
+- [Full Testing Checklist](https://docs.tabby.ai/pay-in-4-custom-integration/full-testing-checklist.md)
+- [POS Integration](https://docs.tabby.ai/offline-payment-methods/pos-integration.md)
+- [Custom Payment Links Integration](https://docs.tabby.ai/offline-payment-methods/custom-payment-links.md)
+- [Testing Credentials](https://docs.tabby.ai/testing-guidelines/testing-credentials.md)
+- [Postman API Collection](https://docs.tabby.ai/testing-guidelines/postman-api-collections.md)
+- [API Reference Documentation](https://docs.tabby.ai/api-reference/overview.md)
+- [Create a session](https://docs.tabby.ai/api-reference/checkout/create-a-session.md): Creates a Checkout session. Creates Session and Payment, returns Pre-Scoring result (status), ids of Payment and Session.
+- [Session creation payload model](https://docs.tabby.ai/api-reference/checkout/session-payload-model.md)
+- [Retrieve a payment](https://docs.tabby.ai/api-reference/payments/retrieve-a-payment.md): Retrieves the specified payment. Returns the entire payment object, including the payment Status, Captures and Refunds objects.
+- [Update a payment](https://docs.tabby.ai/api-reference/payments/update-a-payment.md): Updates the reference_id. You can only use this endpoint to update this 1 field. If you send other fields in the request, they will simply be ignored by tabby. The payment to be updated can have a status of AUTHORIZED or CLOSED.
+- [Capture a payment](https://docs.tabby.ai/api-reference/payments/capture-a-payment.md): Send a Capture requests for Authorized payments only. If you capture the full payment amount, the payment will be automatically closed with full capture. If you capture partial amount, the payment will remain Authorized until the rest of the amount is captured or Close request sent.
+- [Refund a payment](https://docs.tabby.ai/api-reference/payments/refund-a-payment.md): Send a full or partial refund amount request. You can only refund the payment that has Closed status. By default refunds reflect instantly, which means Tabby initiates a refund through payment gateway.
+- [Close a payment](https://docs.tabby.ai/api-reference/payments/close-a-payment.md): Closed is the final status of the payment. Your payment is going to be closed automatically if you capture the full amount of the payment. If an order is fully cancelled, please close the payment without capturing it - the customer will be refunded for all paid amount. If only a part of the order is…
+- [List of all payments](https://docs.tabby.ai/api-reference/payments/list-of-all-payments.md): Returns a list of success payments (`AUTHORIZED` or `CLOSED`) you’ve previously created. The payments are returned in sorted order, with the most recent payments appearing first. Each entry in the array is a separate payments object, including the status, any captures and any refunds. If no more pay…
+- [Register a webhook](https://docs.tabby.ai/api-reference/webhooks/register-a-webhook.md): Creates a new webhook. Webhooks are registered per `merchant_code` and per environment: the environment is determined by the secret key you authorize the request with — a production key (`sk_...`) registers webhooks for production payments, a test key (`sk_test_...`) registers webhooks for test paym…
+- [Retrieve all webhooks](https://docs.tabby.ai/api-reference/webhooks/retrieve-all-webhooks.md): Retrieves all registred webhooks.
+- [Retrieve a webhook](https://docs.tabby.ai/api-reference/webhooks/retrieve-a-webhook.md): Retrieves the specified webhook.
+- [Update a webhook](https://docs.tabby.ai/api-reference/webhooks/update-a-webhook.md): Updates the specified webhook.
+- [Remove a webhook](https://docs.tabby.ai/api-reference/webhooks/remove-a-webhook.md): Removes the specified webhook.
+- [Get disputes list](https://docs.tabby.ai/api-reference/disputes/get-disputes-list.md): Returns list of 100 recently created disputes.
+- [Get dispute by id](https://docs.tabby.ai/api-reference/disputes/get-dispute-by-id.md): Returns detailed information about dispute.
+- [Provide evidence for a dispute](https://docs.tabby.ai/api-reference/disputes/provide-evidence.md): Provide evidence (text and/or attachments) for a dispute. Used by the merchant to submit proof in response to an evidence request.
+- [Approve disputes](https://docs.tabby.ai/api-reference/disputes/approve-disputes.md): Approve disputes (refund money to the customer). Only 20 disputes can be approved within a single request.
+- [Challenge disputes](https://docs.tabby.ai/api-reference/disputes/challenge-disputes.md): Challenge disputes (request Tabby support to take a look at the case). Only 20 disputes can be challenged within a single request. Only disputes with status 'new' might be challenged.
+- [Upload attachment](https://docs.tabby.ai/api-reference/disputes/upload-attachment.md): Upload an attachment. Attachment must be in PNG, JPEG or PDF format and can be up to 5 megabytes in size. Files larger than 5 MB are rejected.
+- [Marketing Toolkit](https://docs.tabby.ai/marketing/toolkit.md)
+- [Marketing Guidelines](https://docs.tabby.ai/marketing/approved-messaging.md)
+- [Logos](https://docs.tabby.ai/marketing/brand-assets.md)
+- [Website / App Assets](https://docs.tabby.ai/marketing/website-app-assets.md)
+- [Email Assets](https://docs.tabby.ai/marketing/email-assets.md)
+- [Social Media Assets](https://docs.tabby.ai/marketing/social-media-assets.md)
+- [In-store Assets](https://docs.tabby.ai/marketing/in-store-assets.md)
+
+## OpenAPI Specs
+
+- [openapi](https://docs.tabby.ai/openapi.yaml)

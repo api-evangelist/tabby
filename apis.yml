@@ -6,11 +6,19 @@ apis:
   name: Tabby Checkout API
   description: Checkout is a whole process of customer data collection and payment authorization.
   humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  baseURL: https://api.tabby.ai
+  baseURLs:
+  - url: https://api.tabby.ai
+    region: UAE, Kuwait
+  - url: https://api.tabby.sa
+    region: KSA
   tags:
   - Checkout
   properties:
   - type: OpenAPI
     url: openapi/tabby-checkout-api-openapi.yml
+  - type: Overlay
+    url: overlays/tabby-checkout-api-overlay.yaml
   - type: Documentation
     url: https://docs.tabby.ai/api-reference/checkout/create-a-session
   - type: Documentation
@@ -52,12 +60,20 @@ apis:
     functionality available in Tabby Merchant Dashboard and operates exclusively with live payments using
     live credentials. A secret key is required for using the Disputes API. <SchemaDefinition schemaRef="#/components/schemas/Webhook"
     />
-  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  humanURL: https://docs.tabby.ai/api-reference/disputes
+  baseURL: https://api.tabby.ai
+  baseURLs:
+  - url: https://api.tabby.ai
+    region: UAE, Kuwait
+  - url: https://api.tabby.sa
+    region: KSA
   tags:
   - Disputes
   properties:
   - type: OpenAPI
     url: openapi/tabby-disputes-api-openapi.yml
+  - type: Overlay
+    url: overlays/tabby-disputes-api-overlay.yaml
   - type: Documentation
     url: https://docs.tabby.ai/api-reference/checkout/create-a-session
   - type: Documentation
@@ -93,12 +109,20 @@ apis:
 - aid: tabby:tabby-payments-api
   name: Tabby Payments API
   description: The core of tabby is a payments flow enabling you to handle payments at your webstore.
-  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  humanURL: https://docs.tabby.ai/api-reference/payments/retrieve-a-payment
+  baseURL: https://api.tabby.ai
+  baseURLs:
+  - url: https://api.tabby.ai
+    region: UAE, Kuwait
+  - url: https://api.tabby.sa
+    region: KSA
   tags:
   - Payments
   properties:
   - type: OpenAPI
     url: openapi/tabby-payments-api-openapi.yml
+  - type: Overlay
+    url: overlays/tabby-payments-api-overlay.yaml
   - type: Documentation
     url: https://docs.tabby.ai/api-reference/checkout/create-a-session
   - type: Documentation
@@ -134,7 +158,13 @@ apis:
 - aid: tabby:tabby-webhooks-api
   name: Tabby Webhooks API
   description: Manage webhook endpoints.
-  humanURL: https://docs.tabby.ai/api-reference/checkout/create-a-session
+  humanURL: https://docs.tabby.ai/api-reference/webhooks/register-a-webhook
+  baseURL: https://api.tabby.ai
+  baseURLs:
+  - url: https://api.tabby.ai
+    region: UAE, Kuwait
+  - url: https://api.tabby.sa
+    region: KSA
   tags:
   - Webhook
   tags_raw:
@@ -142,6 +172,8 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/tabby-webhooks-api-openapi.yml
+  - type: Overlay
+    url: overlays/tabby-webhooks-api-overlay.yaml
   - type: Documentation
     url: https://docs.tabby.ai/api-reference/checkout/create-a-session
   - type: Documentation
@@ -211,6 +243,8 @@ accessModel:
   - authentication
   generated: '2026-07-22'
   method: derived
+created: '2026-05-24'
+modified: '2026-08-26'
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/tabby.png
 access: 3rd-Party
 common:
@@ -238,7 +272,7 @@ common:
   - url: https://docs.tabby.ai/openapi.yaml
     name: Tabby OpenAPI Specification
     type: OpenAPI
-  - url: https://docs.tabby.ai/pay-in-4-custom-integration/testing-credentials
+  - url: https://docs.tabby.ai/testing-guidelines/testing-credentials
     name: Testing Credentials
     type: Documentation
   - url: https://docs.tabby.ai/pay-in-4-custom-integration/full-testing-checklist
@@ -252,7 +286,7 @@ common:
     type: Documentation
   - url: https://github.com/tabby-ai
     name: Tabby GitHub Organization
-    type: Github
+    type: GitHubOrganization
   - url: https://github.com/tabby-ai/tabby-ios-sdk
     name: Tabby iOS SDK (Swift)
     type: SDKs
@@ -313,19 +347,19 @@ common:
   - url: https://docs.tabby.ai/offline-payment-methods/custom-payment-links
     name: Tabby Custom Payment Links
     type: Documentation
-  - url: https://docs.tabby.ai/mobile-app-sdks/ios-sdk
+  - url: https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/sdk-all
     name: Tabby Mobile SDK Docs
     type: Documentation
-  - url: https://docs.tabby.ai/marketing-resources/brand-assets
+  - url: https://docs.tabby.ai/marketing/brand-assets
     name: Brand Assets
     type: Logos
-  - url: https://www.linkedin.com/company/tabby/
+  - url: https://www.linkedin.com/company/tabbypay
     name: Tabby on LinkedIn
     type: LinkedIn
-  - url: https://twitter.com/tabby
+  - url: https://twitter.com/paywithtabby
     name: Tabby on X
     type: Twitter
-  - url: https://www.instagram.com/tabby/
+  - url: https://www.instagram.com/tabby.uae
     name: Tabby on Instagram
     type: Instagram
   - url: https://tabby.ai/en-AE/newsroom
@@ -349,6 +383,99 @@ common:
   - url: vocabulary/tabby-vocabulary.yml
     name: Tabby Vocabulary
     type: Vocabulary
+  - url: https://docs.tabby.ai/api-reference/overview
+    name: Tabby API Reference
+    type: APIReference
+  - url: https://support.tabby.ai/l/en
+    name: Tabby Support Center
+    type: Support
+  - url: https://merchant.tabby.ai/signup
+    name: Tabby Merchant Dashboard Sign Up
+    type: SignUp
+  - url: https://tabby.ai/en-AE/legal/merchant-terms-and-conditions-b2b/latest
+    name: Merchant Terms and Conditions (B2B)
+    type: TermsOfService
+  - url: https://tabby.ai/en-AE/legal/privacy-policy/latest
+    name: Tabby Privacy Policy
+    type: PrivacyPolicy
+  - url: https://docs.tabby.ai/custom-api.json
+    name: Tabby Pay in 4 API Postman Collection
+    type: Postman
+  - url: https://www.tabby-status.com/
+    name: Tabby Status Page
+    type: StatusPage
+  - url: https://docs.tabby.ai/introduction/ai-tools
+    name: Tabby docs for AI and LLMs
+    type: Documentation
+  - url: packages/tabby-packages.yml
+    name: Tabby Packages and SDKs
+    type: Packages
+  - url: packages/tabby-packages.yml
+    name: Tabby First-Party SDKs
+    type: SDKs
+  - url: well-known/tabby-well-known.yml
+    name: Tabby Well-Known Discovery Probe
+    type: WellKnown
+  - url: mcp/tabby-mcp.yml
+    name: Tabby Docs MCP Server
+    type: MCPServer
+  - url: mcp/tabby-tool-crosswalk.yml
+    name: Tabby MCP to OpenAPI Tool Crosswalk
+    type: ToolCrosswalk
+  - url: a2a/tabby-a2a.yml
+    name: Tabby A2A Agent Card
+    type: AgentCard
+  - url: llms/tabby-llms.txt
+    name: Tabby llms.txt
+    type: LLMsTxt
+  - url: skills/_index.yml
+    name: Tabby Agent Skills
+    type: AgentSkill
+  - url: conventions/tabby-conventions.yml
+    name: Tabby API Conventions
+    type: Conventions
+  - url: conventions/tabby-conventions.yml
+    name: Tabby Idempotency (reference_id on captures and refunds)
+    type: Idempotency
+  - url: errors/tabby-problem-types.yml
+    name: Tabby Error Catalog
+    type: ErrorCatalog
+  - url: lifecycle/tabby-lifecycle.yml
+    name: Tabby API Lifecycle
+    type: Lifecycle
+  - url: conformance/tabby-conformance.yml
+    name: Tabby Standards Conformance
+    type: Conformance
+  - url: conformance/tabby-conformance.yml
+    name: Tabby Published Compliance and Regulatory Statements
+    type: Compliance
+  - url: sandbox/tabby-sandbox.yml
+    name: Tabby Test Environment and Credentials
+    type: Sandbox
+  - url: components/tabby-components.yml
+    name: Tabby Embedded Components
+    type: Components
+  - url: data-model/tabby-data-model.yml
+    name: Tabby Data Model
+    type: DataModel
+  - url: asyncapi/tabby-webhooks.yml
+    name: Tabby Webhook Event Catalog
+    type: Webhooks
+  - url: errors/tabby-decline-codes.yml
+    name: Tabby Rejection Handling (no decline-code catalogue is published)
+    type: Documentation
+  - url: overlays/tabby-checkout-api-overlay.yaml
+    name: Tabby Checkout API Enrichment Overlay
+    type: Overlay
+  - url: overlays/tabby-payments-api-overlay.yaml
+    name: Tabby Payments API Enrichment Overlay
+    type: Overlay
+  - url: overlays/tabby-webhooks-api-overlay.yaml
+    name: Tabby Webhooks API Enrichment Overlay
+    type: Overlay
+  - url: overlays/tabby-disputes-api-overlay.yaml
+    name: Tabby Disputes API Enrichment Overlay
+    type: Overlay
 properties:
   - url: https://docs.tabby.ai/openapi.yaml
     type: OpenAPI
@@ -378,3 +505,9 @@ description: >-
   Public developer surface includes a versioned REST API across two regional hosts (api.tabby.ai for UAE/Kuwait,
   api.tabby.sa for KSA), an OpenAPI 3.1 specification, iOS / Android / Flutter / React Native SDKs, and certified
   Magento 2, Shopify, WooCommerce, Salla, Zid, OpenCart, ExpandCart, Matjrah, Salesforce, and Odoo plugins.
+
+x-enrichment:
+  date: '2026-08-26'
+  status: enriched
+  artifacts_added: 27
+  pass: local-v1

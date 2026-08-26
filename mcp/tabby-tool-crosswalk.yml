@@ -1,0 +1,128 @@
+generated: '2026-08-26'
+method: derived
+source: mcp/tabby-mcp.yml + openapi/_original/tabby-api-openapi.yml
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby publishes both a hosted MCP server and an OpenAPI 3.1 contract, but they do not overlap at
+  all. The MCP server is a documentation retrieval surface (search, virtual-filesystem query,
+  feedback); the OpenAPI describes 19 money-moving REST operations. Not one MCP tool binds to a REST
+  operationId, and not one REST operation is reachable from an MCP client. This is the cleanest
+  possible example of the divergence this crosswalk exists to record: an agent connected to Tabby's
+  MCP server can read about a refund but cannot issue one.
+surfaces:
+  openapi:
+    path: openapi/_original/tabby-api-openapi.yml
+    servers:
+      - https://api.tabby.ai
+      - https://api.tabby.sa
+    auth: http bearer (secret_key)
+    gated: true
+    note: All 19 operations require a merchant secret key; no anonymous surface.
+  mcp:
+    url: https://docs.tabby.ai/mcp
+    auth: none
+    gated: false
+    note: Live tools/list returned real inputSchemas anonymously on 2026-08-26.
+  graphql:
+    present: false
+crosswalk: []
+mcp_only:
+  - tool: search_tabby
+    reason: >-
+      Documentation search over the Tabby knowledge base. No REST equivalent — Tabby publishes no
+      search or content API.
+  - tool: query_docs_filesystem_tabby
+    reason: >-
+      Read-only query over a virtualized filesystem of docs pages and the OpenAPI spec. No REST
+      equivalent.
+  - tool: submit_feedback
+    reason: >-
+      Documentation feedback intake for the docs team. No REST equivalent.
+rest_only:
+  - operationId: postCheckoutSession
+    method: POST
+    path: /api/v2/checkout
+    reason: No MCP tool creates checkout sessions; the MCP server does not call the Tabby API.
+  - operationId: getCheckoutSession
+    method: GET
+    path: /api/v2/checkout/{id}
+    reason: No MCP tool reads checkout sessions.
+  - operationId: getPayment
+    method: GET
+    path: /api/v2/payments/{id}
+    reason: No MCP tool reads payments.
+  - operationId: putPayment
+    method: PUT
+    path: /api/v2/payments/{id}
+    reason: No MCP tool updates payments.
+  - operationId: postPaymentCapture
+    method: POST
+    path: /api/v2/payments/{id}/captures
+    reason: No MCP tool captures payments.
+  - operationId: postPaymentRefund
+    method: POST
+    path: /api/v2/payments/{id}/refunds
+    reason: No MCP tool refunds payments.
+  - operationId: closePayment
+    method: POST
+    path: /api/v2/payments/{id}/close
+    reason: No MCP tool closes payments.
+  - operationId: getPayments
+    method: GET
+    path: /api/v2/payments
+    reason: No MCP tool lists payments.
+  - operationId: postWebhook
+    method: POST
+    path: /api/v1/webhooks
+    reason: No MCP tool registers webhooks.
+  - operationId: getWebhooks
+    method: GET
+    path: /api/v1/webhooks
+    reason: No MCP tool lists webhooks.
+  - operationId: getWebhook
+    method: GET
+    path: /api/v1/webhooks/{id}
+    reason: No MCP tool reads a webhook.
+  - operationId: putWebhook
+    method: PUT
+    path: /api/v1/webhooks/{id}
+    reason: No MCP tool updates a webhook.
+  - operationId: deleteWebhook
+    method: DELETE
+    path: /api/v1/webhooks/{id}
+    reason: No MCP tool deletes a webhook.
+  - operationId: getDisputes
+    method: GET
+    path: /api/v1/disputes
+    reason: No MCP tool lists disputes.
+  - operationId: getDispute
+    method: GET
+    path: /api/v1/disputes/{disputeId}
+    reason: No MCP tool reads a dispute.
+  - operationId: postDisputeProvideEvidence
+    method: POST
+    path: /api/v1/disputes/{disputeId}/provide-evidence
+    reason: No MCP tool submits dispute evidence.
+  - operationId: postDisputesApprove
+    method: POST
+    path: /api/v1/disputes/approve
+    reason: No MCP tool approves disputes.
+  - operationId: postDisputesChallenge
+    method: POST
+    path: /api/v1/disputes/challenge
+    reason: No MCP tool challenges disputes.
+  - operationId: postUploadAttachment
+    method: POST
+    path: /api/v1/disputes/attachments/upload
+    reason: No MCP tool uploads dispute attachments.
+coverage:
+  mcp_tools_total: 3
+  mcp_tools_bound_to_rest: 0
+  rest_operations_total: 19
+  rest_operations_with_tool: 0
+  bound_percent: 0
+  note: >-
+    Zero binding is a real measurement, not a gap in this crosswalk. Tabby's own docs state the MCP
+    server "does not call the Tabby API or move money". The agent-facing path onto the transaction
+    API is the OpenAPI plus the Agent Skills in skills/, not the MCP server.

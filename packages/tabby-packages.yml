@@ -1,0 +1,151 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  registry.npmjs.org, pub.dev, repo1.maven.org, repo.packagist.org, api.github.com (org tabby-ai),
+  https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/sdk-all
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby publishes first-party client SDKs for the four mobile platforms and first-party Magento 2
+  modules on Packagist. Every one was resolved to a registry with a dated version. There is no
+  server-side SDK for any backend language — no Node, Python, PHP, Java, Go, .NET or Ruby client for
+  the Checkout/Payments/Disputes API exists, first-party or otherwise, so a backend integration is
+  raw HTTP against api.tabby.ai / api.tabby.sa. The on-site messaging components (TabbyPromo,
+  TabbyCard) are CDN-distributed with unpinned URLs and have no registry entry at all.
+packages:
+  - name: ai.tabby:tabby-android
+    registry: maven-central
+    language: Kotlin
+    official: true
+    version: 2.0.0
+    published: '2026-05-21'
+    published_precision: maven-metadata lastUpdated (20260521130316)
+    url: https://repo1.maven.org/maven2/ai/tabby/tabby-android/
+    source: https://github.com/tabby-ai/tabby-android-sdk
+    install: implementation("ai.tabby:tabby-android:2.0.0")
+    license: Apache-2.0
+    scope: Checkout initialisation and product/cart/checkout promo snippets for Android.
+  - name: tabby_flutter_inapp_sdk
+    registry: pub.dev
+    language: Dart
+    official: true
+    version: 2.1.0
+    published: '2026-07-24'
+    url: https://pub.dev/packages/tabby_flutter_inapp_sdk
+    source: https://github.com/tabby-ai/tabby_flutter_inapp_sdk
+    license: MIT
+    publisher: tabby.ai
+    scope: Flutter in-app checkout and promo snippets.
+  - name: tabby-react-native-sdk
+    registry: npm
+    language: TypeScript
+    official: true
+    version: 2.0.0
+    published: '2026-06-10'
+    url: https://www.npmjs.com/package/tabby-react-native-sdk
+    license: ISC
+    maintainer: tabbyai (npm-repo@tabby.ai)
+    official_basis: >-
+      npm maintainer account tabbyai publishes from npm-repo@tabby.ai, and the package is the SDK
+      linked from https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/sdk-all.
+    scope: React Native checkout initialisation and promo snippets.
+  - name: tabby-ios-sdk
+    registry: swift-package-manager
+    language: Swift
+    official: true
+    version: 1.7.10
+    published: '2026-06-25'
+    url: https://github.com/tabby-ai/tabby-ios-sdk
+    install: '.package(url: "https://github.com/tabby-ai/tabby-ios-sdk.git", .upToNextMajor(from: "1.6.3"))'
+    license: null
+    scope: iOS checkout initialisation and promo snippets. Swift 5.3+.
+    note: >-
+      Distributed via Swift Package Manager from the GitHub repo; there is no CocoaPods trunk entry
+      (trunk.cocoapods.org returned 404 for TabbySDK). version/published read from the latest
+      GitHub release.
+  - name: '@tabby_ai/hijri-converter'
+    registry: npm
+    language: TypeScript
+    official: true
+    version: 1.0.5
+    published: '2023-08-24'
+    url: https://www.npmjs.com/package/@tabby_ai/hijri-converter
+    source: https://github.com/tabby-ai/hijri-converter
+    license: MIT
+    scope: >-
+      Utility library, not an API client — a TypeScript port of an accurate Hijri/Gregorian date
+      converter. Published under Tabby's own npm scope.
+    note: >-
+      Last published 2023-08-24; the source repo was last pushed 2023-08-30. Three years without a
+      release, but the library is a self-contained calendar converter with no dependency on the API.
+  - name: tabby/m2-checkout
+    registry: packagist
+    language: PHP
+    official: true
+    version: 6.5.0
+    published: '2026-03-26'
+    url: https://packagist.org/packages/tabby/m2-checkout
+    source: https://github.com/tabby-ai/m2-checkout
+    license: OSL-3.0, AFL-3.0
+    scope: Magento 2 payment module (checkout integration).
+  - name: tabby/m2-payments
+    registry: packagist
+    language: PHP
+    official: true
+    version: 7.0.2
+    published: '2026-02-27'
+    url: https://packagist.org/packages/tabby/m2-payments
+    source: https://github.com/tabby-ai/m2-payments
+    license: OSL-3.0, AFL-3.0
+    scope: Magento 2 payments metamodule.
+  - name: tabby/m2-feed
+    registry: packagist
+    language: PHP
+    official: true
+    version: 1.0.4
+    published: '2026-05-11'
+    url: https://packagist.org/packages/tabby/m2-feed
+    source: https://github.com/tabby-ai/m2-feed
+    license: OSL-3.0, AFL-3.0
+    scope: Magento 2 marketplace product-catalogue feed for Tabby Shop.
+  - name: tabby-promo.js
+    registry: cdn
+    language: JavaScript
+    official: true
+    version: null
+    published: null
+    url: https://checkout.tabby.ai/tabby-promo.js
+    scope: >-
+      On-site messaging component (TabbyPromo) for product and cart pages, loaded by script tag.
+    note: >-
+      Checked, nothing to record — the distribution is unpinned. The documented script tag carries
+      no version in the URL and floats to whatever the CDN currently serves, so a merchant cannot
+      determine which build they are running and neither can we. No npm/jsDelivr/unpkg entry exists
+      for it.
+  - name: tabby-card.js
+    registry: cdn
+    language: JavaScript
+    official: true
+    version: null
+    published: null
+    url: https://checkout.tabby.ai/tabby-card.js
+    scope: On-site messaging component (TabbyCard) for the checkout page, loaded by script tag.
+    note: >-
+      Checked, nothing to record — unpinned CDN distribution, same as tabby-promo.js.
+third_party_observed:
+  - name: tabbyai/laravel
+    registry: packagist
+    official: false
+    note: Community Laravel wrapper (github.com/sultan-algarbi/tabby-laravel-package); not Tabby-published despite the vendor name.
+  - name: osa-eg/laravel-tabby-integration
+    registry: packagist
+    official: false
+    note: Community Laravel integration.
+gaps:
+  - No first-party server-side SDK in any language for the Checkout/Payments/Disputes API.
+  - No CocoaPods distribution for iOS; SPM only.
+  - The two on-site messaging scripts are unpinned, so integrators cannot lock a version.
+namespace_warning: >-
+  npm's "tabby-*" namespace is dominated by the unrelated Tabby terminal emulator
+  (tabby-core, tabby-terminal, tabby-settings and its plugin ecosystem). Only the packages listed
+  above resolve to github.com/tabby-ai or the npm-repo@tabby.ai maintainer account.

@@ -1,0 +1,79 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/introduction/faq (question "Is it possible to know the rejection reason for
+  payments?"), https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses,
+  https://docs.tabby.ai/pay-in-4-custom-integration/checkout-flow
+provider: Tabby
+providerId: tabby
+decline_code_count: 0
+publishes_decline_codes: false
+summary: >-
+  Tabby is a payments provider that deliberately publishes no decline-code reference. Its own FAQ
+  states: "Unfortunately, due to compliance and regulatory restrictions, Tabby is not permitted to
+  disclose the specific rejection reasons to merchants." A merchant sees only that the order was
+  declined; the buyer sees a generic message on the Tabby-hosted payment page. This artifact records
+  that absence and the signals that do exist, so an integrator is not left looking for a table that
+  will never be published.
+decline_codes: []
+envelope_field: null
+what_the_merchant_sees:
+  - surface: Checkout session creation
+    operation: postCheckoutSession
+    signal: status
+    values:
+      - value: created
+        meaning: Pre-scoring passed. web_url is present; redirect the buyer.
+      - value: rejected
+        meaning: >-
+          Tabby declined the order. No reason code is returned. web_url may be absent — show the
+          rejection message and do not redirect.
+    note: >-
+      Also carries a configuration.products rejection_reason on the product objects in some
+      responses (CheckoutProductRejectionReason in the OpenAPI), which indicates which Tabby product
+      is unavailable rather than why the buyer was declined.
+  - surface: Payment lifecycle
+    operation: getPayment
+    signal: status
+    values:
+      - value: REJECTED
+        meaning: Tabby declined the order at checkout. Terminal. Cancel or delete the order in your OMS.
+      - value: EXPIRED
+        meaning: >-
+          The checkout was never completed — the buyer cancelled or the session timed out. Terminal.
+          Not a credit decline.
+buyer_facing_messages:
+  - context: Pre-scoring reject (Tabby hidden at checkout) and post-OTP rejection
+    en: >-
+      Sorry, Tabby is unable to approve this purchase, please use an alternative payment method for
+      your order.
+    ar: نأسف، تابي غير قادرة على الموافقة على هذه العملية. الرجاء استخدام طريقة دفع أخرى.
+  - context: Buyer aborted the payment
+    en: You aborted the payment. Please retry or choose another payment method.
+    ar: لقد ألغيت الدفعة. فضلاً حاول مجددًا أو اختر طريقة دفع أخرى.
+masked_to_merchant:
+  - The specific credit/risk reason for any REJECTED payment.
+  - Per-buyer and per-store transaction limits. The docs state these are dynamic, based on industry
+    risk and the buyer's history with your store and with other Tabby merchants, and advise
+    merchants not to hard-code limits.
+escalation_path:
+  when: A technical fault is suspected — multiple or all transactions rejecting.
+  contact:
+    - partner@tabby.ai (UAE, Kuwait)
+    - partner@tabby.sa (KSA)
+  include:
+    - Store name as registered with Tabby
+    - Website URL or app name for online integrations
+    - Description of the offline integration if applicable
+  docs: https://docs.tabby.ai/introduction/faq
+integration_guidance:
+  - Treat REJECTED as final and unexplained. Do not build reason-code branching; there is nothing to
+    branch on.
+  - Fail safe on API errors or timeouts during eligibility checks — Tabby's own guidance is to show
+    the Tabby option rather than block checkout.
+  - Distinguish REJECTED (credit decline) from EXPIRED (buyer abandonment) before any messaging or
+    retargeting decision; they look similar in an OMS but mean opposite things.
+note: >-
+  No DeclineCodes pointer is wired in apis.yml for this file. The pointer asserts that the provider
+  publishes a decline-code catalogue, and Tabby explicitly does not. Machine-readable error handling
+  for this API is in errors/tabby-problem-types.yml.

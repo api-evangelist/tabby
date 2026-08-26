@@ -1,0 +1,91 @@
+generated: '2026-08-26'
+method: probed
+source: live GET probes of /.well-known/* on every apis.yml and OpenAPI servers[] host
+provider: Tabby
+providerId: tabby
+summary: >-
+  Four hosts were probed for the standard /.well-known/ discovery documents. The two API hosts
+  (api.tabby.ai, api.tabby.sa) and the marketing host (tabby.ai) serve nothing at any probed path.
+  The documentation host (docs.tabby.ai) serves a real A2A Agent Card and the Agent Skill markdown
+  that card points at; every other path there 404s. No security.txt, no api-catalog, no OAuth or
+  OpenID metadata is published anywhere — consistent with Tabby's Bearer-secret-key auth model,
+  which has no discovery surface.
+hosts:
+  - host: api.tabby.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: api.tabby.sa
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: docs.tabby.ai
+    documents:
+      - path: /.well-known/agent-card.json
+        status: 200
+        file: ../a2a/tabby-agent-card.json
+        content_type: application/json
+        note: Real A2A Agent Card, graded conformant against A2A 1.0.0 in a2a/tabby-a2a.yml.
+      - path: /.well-known/agent-skills/tabby/skill.md
+        status: 200
+        file: ../skills/tabby-tabby.md
+        content_type: text/markdown
+        note: Provider-published Agent Skill referenced by skills[0].url of the agent card.
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+        note: Returns the docs SPA 404 shell, not a document.
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: tabby.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+gaps:
+  - No /.well-known/security.txt (RFC 9116) on any host — no machine-readable vulnerability
+    disclosure contact.
+  - No /.well-known/api-catalog (RFC 9727) — the OpenAPI is published at
+    https://docs.tabby.ai/openapi.yaml but is not discoverable from any well-known path.

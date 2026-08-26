@@ -1,0 +1,123 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/introduction/technical-requirements,
+  https://docs.tabby.ai/introduction/faq,
+  https://www.tabby-status.com/,
+  https://docs.tabby.ai/api-reference/overview,
+  openapi/_original/tabby-api-openapi.yml
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby runs a real, subscribable status page with a documented incident-communication policy, and
+  publishes no versioning or deprecation policy at all. Two major path versions (/api/v2 for
+  Checkout and Payments, /api/v1 for Webhooks and Disputes) are live simultaneously with no
+  statement about how either will be retired. No operation in the spec is marked deprecated.
+status_page:
+  present: true
+  url: https://www.tabby-status.com/
+  http_status: 200
+  title: Tabby Status
+  subscribable: true
+  documented_at: https://docs.tabby.ai/introduction/technical-requirements#status-page
+  scope: Live status, maintenance alerts and incident history for Tabby services.
+  incident_policy:
+    posting_latency: Alerts posted manually within 5-10 minutes of identifying and confirming an issue.
+    guidance:
+      - If Checkout or Payments APIs are affected for all countries, disable Tabby until resolution
+        is confirmed.
+      - If one country is affected, disable Tabby for that country only.
+      - If non-real-time systems are affected, no merchant action is required.
+      - Scheduled maintenance windows under 10 minutes recover automatically.
+    escalation: partner@tabby.ai / partner@tabby.sa, or the Integrations Team thread.
+versioning:
+  policy_published: false
+  style: path-segment
+  live_versions:
+    - version: v2
+      surface: Checkout, Payments
+      paths: [/api/v2/checkout, /api/v2/payments]
+    - version: v1
+      surface: Webhooks, Disputes
+      paths: [/api/v1/webhooks, /api/v1/disputes]
+  spec_version: '1.0.0'
+  spec_url: https://docs.tabby.ai/openapi.yaml
+  notes:
+    - No version header, no dated versions, no /versions endpoint.
+    - The OpenAPI info.version has been 1.0.0 across every capture; it does not track API change.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  note: >-
+    No deprecation policy, no Sunset/Deprecation response headers, and no operation carries
+    deprecated: true in the OpenAPI. There is no published notice period for a breaking change.
+changelog:
+  published: false
+  probes:
+    - url: https://docs.tabby.ai/changelog
+      status: 404
+    - url: https://docs.tabby.ai/api-reference/changelog
+      status: 404
+  note: >-
+    No dated changelog or release-notes page exists on the documentation host. Docs history is
+    visible only as commits in github.com/tabby-ai/mintlify-docs, which is not a published changelog.
+sla:
+  published: false
+  note: >-
+    No public uptime SLA or response-time commitment. Commercial terms are per-merchant contract;
+    see plans/tabby-plans-pricing.yml.
+resource_lifecycles:
+  - resource: Checkout session
+    states: [created, rejected]
+    expiry: 20 minutes from creation (reducible on request via the assigned business manager)
+    docs: https://docs.tabby.ai/pay-in-4-custom-integration/payment-processing#session-expiration
+  - resource: Payment
+    states: [CREATED, AUTHORIZED, CLOSED, REJECTED, EXPIRED]
+    terminal_states: [CLOSED, REJECTED, EXPIRED]
+    transitions:
+      - from: CREATED
+        to: AUTHORIZED
+        trigger: Buyer completes the Tabby checkout
+      - from: CREATED
+        to: REJECTED
+        trigger: Tabby scoring declines the order
+      - from: CREATED
+        to: EXPIRED
+        trigger: Buyer cancels, or the session times out (~30 minutes from creation)
+      - from: AUTHORIZED
+        to: CLOSED
+        trigger: Full capture, or an explicit close
+    windows:
+      - name: Missing-capture grace
+        value: 21 days
+        detail: >-
+          Tabby leaves a non-captured AUTHORIZED payment untouched for 21 days after authorization;
+          after that Tabby may capture the remaining amount in full on its side.
+      - name: Refund window
+        value: 180 days from payment creation
+      - name: Payment expiry after session timeout
+        value: ~10 minutes after session expiry
+    docs: https://docs.tabby.ai/pay-in-4-custom-integration/payment-statuses
+  - resource: Webhook endpoint
+    limit: 4 per merchant_code + secret key pair
+    lifecycle: Registered, updated and removed through /api/v1/webhooks; no expiry.
+  - resource: Dispute
+    states: [new, pending, arbitration, evidence_merchant, approved, declined, cancelled]
+    note: >-
+      Only disputes in status "new" can be challenged. Disputes exist for live payments only —
+      there is no dispute test mode.
+    docs: https://docs.tabby.ai/pay-in-4-custom-integration/dispute-webhooks
+platform_support:
+  browsers: >-
+    Chrome, Firefox, Safari and Microsoft Edge on all platforms for three years from version
+    release. Browsers no longer receiving security updates are unsupported.
+  mobile: iOS 12 and above, Android 7 and above.
+  docs: https://docs.tabby.ai/introduction/technical-requirements#supported-browsers-devices
+gaps:
+  - No deprecation policy or notice period.
+  - No changelog.
+  - No published SLA.
+  - Two live major versions with no stated retirement plan for v1.

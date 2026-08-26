@@ -1,0 +1,108 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  https://docs.tabby.ai/pay-in-4-custom-integration/on-site-messaging,
+  https://docs.tabby.ai/pay-in-4-custom-integration/checkout-flow,
+  https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/sdk-all,
+  https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/app-promo-messaging,
+  https://docs.tabby.ai/offline-payment-methods/pos-integration,
+  https://docs.tabby.ai/offline-payment-methods/custom-payment-links
+provider: Tabby
+providerId: tabby
+summary: >-
+  Tabby's client-side surface is three families: two JavaScript on-site messaging widgets loaded
+  from the checkout CDN, the hosted checkout page itself (the only place a buyer is ever asked for
+  credentials), and the native snippet components inside the four mobile SDKs. Everything that
+  touches money runs on Tabby's own hosted page — merchants never render a payment form.
+families:
+  - id: on-site-messaging
+    name: On-site messaging (JavaScript snippets)
+    delivery: script tag from the checkout CDN
+    loader_scripts:
+      - url: https://checkout.tabby.ai/tabby-promo.js
+        global: TabbyPromo
+        region: UAE, Kuwait
+      - url: https://checkout.tabby.ai/tabby-card.js
+        global: TabbyCard
+        region: UAE, Kuwait
+    regional_note: >-
+      KSA merchants use the tabby.sa equivalents; the checkout host mirrors the API host chosen for
+      the market.
+    versioning: unpinned — the script URLs carry no version and float to the current CDN build.
+    credentials: Public key (pk_) and merchant code only. Never the secret key.
+    components:
+      - name: TabbyPromo
+        placement: Product and cart pages — near the price, next to "Add to cart", or below the cart total.
+        purpose: Split-price messaging with a "Learn more" pop-up showing the payment schedule.
+        required_options: [selector, currency, price, publicKey, merchantCode]
+        optional_options: [lang, source, shouldInheritBg]
+        option_notes:
+          currency: AED, SAR or KWD — uppercase, no spaces.
+          price: 2 decimals for AED/SAR, 3 for KWD. Re-initialise when the price changes (variant selectors).
+          lang: en or ar.
+          source: product or cart.
+          shouldInheritBg: >-
+            true inherits the page background; text colours can then be overridden via the CSS
+            variables --snippetTextColor and --snippetLinkTextColor.
+        constraints: Must render correctly down to a 320px viewport.
+      - name: TabbyCard
+        placement: Checkout page, under the Tabby payment method option; show when Tabby is selected.
+        purpose: Recommended presentation of Tabby payment details at checkout.
+        required_options: [selector, currency, price, publicKey, merchantCode]
+        optional_options: [lang, shouldInheritBg]
+  - id: hosted-checkout
+    name: Tabby Hosted Payment Page
+    delivery: redirect or WebView to the web_url returned by postCheckoutSession
+    hosts:
+      - https://checkout.tabby.ai
+      - https://checkout.tabby.sa
+    purpose: >-
+      Buyer identification, OTP, credit decision and payment-plan selection. The merchant never
+      collects or transmits payment credentials.
+    return_contract:
+      urls: merchant_urls.success, merchant_urls.cancel, merchant_urls.failure
+      payload: payment_id appended as a query parameter to the chosen redirect URL
+      expected_status:
+        success: AUTHORIZED
+        cancel: EXPIRED
+        failure: REJECTED
+      warning: >-
+        Never trust the redirect alone — verify server-to-server with getPayment, and rely on
+        webhooks for buyers who never return.
+    allowed_redirect_characters: >-
+      Latin letters, Arabic letters, digits, and the special characters - \ | / : ; . , + {} ? & @ = # %
+  - id: mobile-snippets
+    name: Native mobile snippet components
+    delivery: platform SDKs (see packages/tabby-packages.yml)
+    platforms: [iOS, Android, Flutter, React Native]
+    components:
+      - name: Product page snippet
+      - name: Cart page snippet
+      - name: Checkout page snippet
+    purpose: >-
+      The mobile equivalents of TabbyPromo/TabbyCard, plus checkout initialisation. Payment
+      verification and processing still run server-side against the Payments API and webhooks.
+    no_sdk_option: >-
+      Merchants can skip the SDK and open the hosted checkout in a WebView or system browser; the
+      docs cover state recovery for buyers who close the WebView mid-flow.
+      https://docs.tabby.ai/pay-in-4-custom-integration/mobile-apps/integration-without-sdk
+  - id: offline-surfaces
+    name: Offline and link-based surfaces
+    components:
+      - name: QR checkout session
+        context: POS terminals — the checkout session is presented as a QR code for the buyer to scan.
+        docs: https://docs.tabby.ai/offline-payment-methods/pos-integration
+      - name: Custom payment link
+        context: A shareable link to a hosted checkout for remote or invoice-style sales.
+        docs: https://docs.tabby.ai/offline-payment-methods/custom-payment-links
+brand_assets:
+  url: https://docs.tabby.ai/marketing/brand-assets
+  note: >-
+    Logos and marketing assets, with usage rules (capital T, unmodified logo, never described as a
+    credit card or loan).
+gaps:
+  - No web components, no npm package and no integrity hash for the two on-site scripts — they are
+    global-constructor script tags on an unpinned CDN URL.
+  - No React/Vue/Angular wrappers for the web snippets.
+  - No embeddable merchant dashboard or analytics component; merchant.tabby.ai is a separate hosted
+    application with no embed surface.
