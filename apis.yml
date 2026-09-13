@@ -220,7 +220,6 @@ apis:
     url: json-schema/tabby-dispute-schema.json
 name: Tabby
 tags:
-  - BNPL
   - Buy Now Pay Later
   - Consumer Finance
   - E-Commerce
