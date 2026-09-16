@@ -490,6 +490,8 @@ common:
   - url: overlays/tabby-disputes-api-overlay.yaml
     name: Tabby Disputes API Enrichment Overlay
     type: Overlay
+  - type: Contact
+    url: mailto:help@tabby.ai
 properties:
   - url: https://docs.tabby.ai/openapi.yaml
     type: OpenAPI
