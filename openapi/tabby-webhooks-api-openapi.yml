@@ -1,13 +1,11 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Tabby API Reference Checkout Webhooks API
+  title: Tabby API Reference Webhooks API
   version: 1.0.0
   x-logo:
     url: assets/tabby-new.png
     altText: tabby Logo
-  description: 'Tabby Documentation:  **[docs.tabby.ai](https://docs.tabby.ai/)**
-
-    '
+  description: 'Tabby Documentation: **docs.tabby.ai**'
 servers:
 - url: https://api.tabby.ai/
   description: Production (UAE, Kuwait)
@@ -141,40 +139,92 @@ paths:
         '500':
           $ref: '#/components/responses/UnexpectedError'
 components:
-  schemas:
+  responses:
+    Webhook:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Webhook'
+    NotFoundError:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404'
+    WebhookDelete:
+      description: Webhook was deleted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookDelete'
+    NotFoundError_no_such_webhook:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404_no_such_webhook'
+    AuthenticationError_invalid_secret_key:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_invalid_secret_key'
+    ForbiddenError:
+      description: You tried to perform an action which is forbidden.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_403'
+    AuthenticationError_authorization:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_authorization'
     WebhookRegistration:
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-          example: https://example.com/
-          description: HTTPS endpoint for notifications. The URL should be valid and accessible (not local).
-        header:
-          type: object
-          properties:
-            title:
-              type: string
-              example: Arbitrary header name to sign the request
-              description: Arbitrary header name to sign the request.
-            value:
-              type: string
-              example: Random string to sign the request
-              description: Random string to sign the request.
-      required:
-      - url
-    Error_401_invalid_secret_key:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookRegistrationResponse'
+    WebhookAll:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookResponseAll'
+    BadRequestError_bad_request:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_bad_request'
+    UnexpectedError:
+      description: Something bad happened. We're notified.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_500'
+    WebhookUpdate:
+      description: Success. Webhook object is returned.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebhookUpdate'
+  schemas:
+    Error_404:
+      type: string
+      example: 404 page not found
+    WebhookDelete:
       type: object
       properties:
         status:
           type: string
-          example: error
-        errorType:
-          type: string
-          example: not_authorized
-        error:
-          type: string
-          example: invalid secret key
+          example: ok
+    Error_500:
+      type: string
+      example: Internal Server error
     WebhookRegistrationResponse:
       type: object
       properties:
@@ -209,13 +259,7 @@ components:
       required:
       - url
       - is_test
-    Error_404:
-      type: string
-      example: 404 page not found
-    Error_500:
-      type: string
-      example: Internal Server error
-    Error_401_authorization:
+    Error_404_no_such_webhook:
       type: object
       properties:
         status:
@@ -223,10 +267,10 @@ components:
           example: error
         errorType:
           type: string
-          example: not_authorized
+          example: not_found
         error:
           type: string
-          example: authorization
+          example: no such webhook
     WebhookUpdate:
       type: object
       properties:
@@ -254,43 +298,6 @@ components:
       required:
       - url
       - id
-    Error_403:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        errorType:
-          type: string
-          example: no_permission
-    WebhookResponseAll:
-      oneOf:
-      - $ref: '#/components/schemas/Webhook'
-      - description: If no webhooks are registered - `null` will be returned.
-    Error_404_no_such_webhook:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        errorType:
-          type: string
-          example: not_found
-        error:
-          type: string
-          example: no such webhook
-    Error_400_bad_request:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        errorType:
-          type: string
-          example: bad_data
-        error:
-          type: string
-          example: bad_request
     Webhook:
       type: object
       properties:
@@ -324,94 +331,77 @@ components:
       - url
       - is_test
       - id
-    WebhookDelete:
+    Error_401_authorization:
       type: object
       properties:
         status:
           type: string
-          example: ok
-  responses:
-    NotFoundError_no_such_webhook:
-      description: You are using an incorrect ID.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_404_no_such_webhook'
-    WebhookDelete:
-      description: Webhook was deleted successfully.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WebhookDelete'
-    AuthenticationError_invalid_secret_key:
-      description: The request cannot be authorized.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_401_invalid_secret_key'
-    AuthenticationError_authorization:
-      description: The request cannot be authorized.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_401_authorization'
-    NotFoundError:
-      description: You are using an incorrect ID.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_404'
-    WebhookUpdate:
-      description: Success. Webhook object is returned.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WebhookUpdate'
-    BadRequestError_bad_request:
-      description: One of the required fields is missing or request is not formatted correctly.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_400_bad_request'
-    UnexpectedError:
-      description: Something bad happened. We're notified.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_500'
-    ForbiddenError:
-      description: You tried to perform an action which is forbidden.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_403'
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: authorization
+    WebhookResponseAll:
+      oneOf:
+      - $ref: '#/components/schemas/Webhook'
+      - description: If no webhooks are registered - `null` will be returned.
+    Error_403:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: no_permission
+    Error_400_bad_request:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: bad_data
+        error:
+          type: string
+          example: bad_request
+    Error_401_invalid_secret_key:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: invalid secret key
     WebhookRegistration:
-      description: Success. Webhook object is returned.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WebhookRegistrationResponse'
-    Webhook:
-      description: Success. Webhook object is returned.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Webhook'
-    WebhookAll:
-      description: Success. Webhook object is returned.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WebhookResponseAll'
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: https://example.com/
+          description: HTTPS endpoint for notifications. The URL should be valid and accessible (not local).
+        header:
+          type: object
+          properties:
+            title:
+              type: string
+              example: Arbitrary header name to sign the request
+              description: Arbitrary header name to sign the request.
+            value:
+              type: string
+              example: Random string to sign the request
+              description: Random string to sign the request.
+      required:
+      - url
   parameters:
-    merchantCodeParam:
-      in: header
-      name: X-Merchant-Code
-      required: true
-      schema:
-        type: string
-        example: code provided to you from Tabby side
-      description: Used for multi store/countries setup, please contact your Account manager to recognize that
     webhookIdParam:
       in: path
       name: id
@@ -421,6 +411,14 @@ components:
         format: uuid
         example: webhook id, uuid format
       description: ID of the webhook.
+    merchantCodeParam:
+      in: header
+      name: X-Merchant-Code
+      required: true
+      schema:
+        type: string
+        example: code provided to you from Tabby side
+      description: Used for multi store/countries setup, please contact your Account manager to recognize that
   securitySchemes:
     bearerAuth:
       type: http
