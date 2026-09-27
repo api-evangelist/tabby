@@ -229,6 +229,7 @@ tags:
   - Payments
   - Saudi Arabia
   - United Arab Emirates
+  - A2A
 tags_raw:
   - BNPL
   - Buy Now Pay Later
@@ -240,6 +241,7 @@ tags_raw:
   - Payments
   - Saudi Arabia
   - UAE
+  - A2A
 kind: contract
 accessModel:
   pricing: enterprise
@@ -527,3 +529,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 27
   pass: local-v1
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://docs.tabby.ai/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3"
+  control: 404
