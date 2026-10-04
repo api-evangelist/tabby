@@ -1,0 +1,35 @@
+slug: tabby
+provider: Tabby
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 2
+edges:
+- tag: Webhooks
+  spec_file: tabby-webhooks-api-openapi.yml
+  capability_id: BC-4270.80
+  capability_id_l1: BC-4270
+  capability_name: Webhook & Event Subscription Management
+  confidence: 0.85
+  evidence: POST /api/v1/webhooks 'Register a webhook'; schemas WebhookRegistration, WebhookUpdate, WebhookDelete
+  reason: Pure CRUD over outbound webhook subscriptions for merchant integrations, which is exactly the
+    Webhook & Event Subscription Management capability in this frame.
+- tag: Payments
+  spec_file: tabby-payments-api-openapi.yml
+  capability_id: BC-4250.40
+  capability_id_l1: BC-4250
+  capability_name: Payment Collection & Dunning
+  confidence: 0.7
+  evidence: POST /api/v2/payments/{id}/captures 'Capture a payment'; POST /api/v2/payments/{id}/refunds
+    'Refund a payment'; schemas PaymentCaptureResponse, RefundRequest
+  reason: Operations authorise, capture, refund and close customer payments — payment collection mechanics.
+    Mapped to Payment Collection within the frame's billing L1; the subscription framing is imperfect
+    for a BNPL payment API, so confidence is moderate.
