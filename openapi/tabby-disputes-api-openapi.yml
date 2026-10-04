@@ -271,6 +271,46 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
 components:
   responses:
+    NotFoundError:
+      description: You are using an incorrect ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_404'
+    DisputesChallenge:
+      description: Success. Disputes were challenged.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              disputes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisputeNoHistory'
+    DisputesApprove:
+      description: Success. Disputes were approved.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              disputes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisputeNoHistory'
+    BadRequestError_bad_request:
+      description: One of the required fields is missing or request is not formatted correctly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_400_bad_request'
+    AuthenticationError_invalid_secret_key:
+      description: The request cannot be authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_401_invalid_secret_key'
     DisputeAttachmentUpload:
       description: Success. Attachment was uploaded.
       content:
@@ -283,46 +323,30 @@ components:
                 format: uuid
                 example: attachment id, uuid format
                 description: Unique ID of attachment
-    DisputesChallenge:
-      description: Success. Disputes were challenged.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              disputes:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DisputeNoHistory'
-    NotFoundError:
+    NotFoundError_Disputes:
       description: You are using an incorrect ID.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error_404'
-    UnexpectedError:
-      description: Something bad happened. We're notified.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_500'
-    DisputesApprove:
-      description: Success. Disputes were approved.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              disputes:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DisputeNoHistory'
+            $ref: '#/components/schemas/Error_404_dispute_not_found'
     DisputeProvideEvidenceConflict:
       description: Conflict. Evidence cannot be submitted for the dispute in its current state.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error_409'
+    DisputeProvideEvidence:
+      description: Success. Evidence was submitted for the dispute.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Evidence'
+    UnexpectedError:
+      description: Something bad happened. We're notified.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_500'
     Disputes:
       description: Success. Returns a list of disputes.
       content:
@@ -340,18 +364,6 @@ components:
             required:
             - disputes
             - next_page_token
-    BadRequestError_bad_request:
-      description: One of the required fields is missing or request is not formatted correctly.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_400_bad_request'
-    AuthenticationError_invalid_secret_key:
-      description: The request cannot be authorized.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_401_invalid_secret_key'
     Dispute:
       description: Success. Returns dispute info.
       content:
@@ -363,22 +375,40 @@ components:
                 $ref: '#/components/schemas/Dispute'
             required:
             - dispute
-    DisputeProvideEvidence:
-      description: Success. Evidence was submitted for the dispute.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Evidence'
-    NotFoundError_Disputes:
-      description: You are using an incorrect ID.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_404_dispute_not_found'
   schemas:
-    Error_404:
+    DisputeDaysLeft:
+      type: integer
+      format: uint16
+      description: How many days left before dispute will be automatically approved.
+    DisputeCreatedAt:
       type: string
-      example: 404 page not found
+      readOnly: true
+      example: 2018-10-17 00:00:00+00:00
+      description: Date and time the Dispute was created, in UTC, and displayed in ISO 8601 datetime format.
+    Error_409:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: conflict
+        error:
+          type: string
+          example: payment is disputed
+    PaymentID:
+      type: string
+      format: uuid
+      example: payment id, uuid format
+      readOnly: true
+      description: Unique identifier for the payment (UUID), assigned by Tabby. Save it on your side!
+    DisputeID:
+      type: string
+      format: uuid
+      example: dispute id, uuid format
+      readOnly: true
+      description: ID of the dispute.
     DisputeStatus:
       type: string
       readOnly: true
@@ -392,47 +422,6 @@ components:
       - evidence_customer
       example: new
       description: "The current status of the dispute:\n  - `new` - dispute pending merchant approval for refund or initiate a challenge\n  - `declined` - dispute was declined by Tabby support\n  - `cancelled` - dispute was canceled by customer\n  - `refunded` - dispute was approved or the order was refunded via Payments API\n  - `in_progress` - merchant challenged dispute and need a response from Tabby support\n  - `evidence_merchant` - waiting for evidence from the merchant\n  - `evidence_customer` - waiting for evidence from the customer\n"
-    DisputeOrderItem:
-      type: object
-      properties:
-        reference_id:
-          type: string
-          example: payment id
-          description: Reference id from payment.
-        title:
-          type: string
-          example: Order item title
-          description: Order item title.
-        unit_price:
-          type: string
-          example: '100.00'
-          description: Order item unit price.
-      required:
-      - reference_id
-      - title
-      - unit_price
-    DisputeReason:
-      type: string
-      readOnly: true
-      enum:
-      - unreceived_refund
-      - identity_theft
-      - product_issue
-      - not_delivered
-      example: unreceived_refund
-      description: "Cause of the dispute was created (selected by customer). There are only four reasons:\n  - `unreceived_refund` - a refund not received\n  - `identity_theft` - I did not place this order (also known as identity theft)\n  - `product_issue` - there was a problem with the product\n  - `not_delivered` - the order was not delivered\n"
-    Error_401_invalid_secret_key:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        errorType:
-          type: string
-          example: not_authorized
-        error:
-          type: string
-          example: invalid secret key
     DisputeAttachments:
       type: array
       nullable: true
@@ -441,7 +430,72 @@ components:
         example: attachment_1
       readOnly: true
       description: Array of links to images which were uploaded by customer.
-    Error_409:
+    DisputeComment:
+      type: string
+      example: additional comments
+      description: The customer additional comments on the causes of the dispute.
+    DisputeExpiredAt:
+      type: string
+      readOnly: true
+      example: 2018-10-17 00:00:00+00:00
+      description: Date and time of the expiration of the Dispute, in UTC, and displayed in ISO 8601 datetime format.
+    Dispute:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DisputeID'
+        attachments:
+          $ref: '#/components/schemas/DisputeAttachments'
+        payment_id:
+          $ref: '#/components/schemas/PaymentID'
+          description: ID of the payment.
+        amount:
+          type: string
+          example: '100.00'
+          description: Total disputed amount.
+        currency:
+          $ref: '#/components/schemas/Currency'
+          description: The currency of the dispute. It's always equal to the currency of the payment.
+        created_at:
+          $ref: '#/components/schemas/DisputeCreatedAt'
+        expired_at:
+          $ref: '#/components/schemas/DisputeExpiredAt'
+        status:
+          $ref: '#/components/schemas/DisputeStatus'
+        reason:
+          $ref: '#/components/schemas/DisputeReason'
+        days_left:
+          $ref: '#/components/schemas/DisputeDaysLeft'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeHistoryItem'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeOrderItem'
+        order_number:
+          type: string
+          example: '#1234'
+          description: Merchant-assigned order number.
+        comment:
+          $ref: '#/components/schemas/DisputeComment'
+      required:
+      - id
+      - attachments
+      - payment_id
+      - amount
+      - currency
+      - created_at
+      - expired_at
+      - status
+      - reason
+      - days_left
+      - history
+      - items
+      - order_number
+      - comment
+    Error_400_bad_request:
       type: object
       properties:
         status:
@@ -449,10 +503,13 @@ components:
           example: error
         errorType:
           type: string
-          example: conflict
+          example: bad_data
         error:
           type: string
-          example: payment is disputed
+          example: bad_request
+    Error_404:
+      type: string
+      example: 404 page not found
     DisputeHistoryItem:
       type: object
       properties:
@@ -511,76 +568,37 @@ components:
       - content
       - source
       - event_type
-    Dispute:
+    Error_401_invalid_secret_key:
       type: object
       properties:
-        id:
-          $ref: '#/components/schemas/DisputeID'
-        attachments:
-          $ref: '#/components/schemas/DisputeAttachments'
-        payment_id:
-          $ref: '#/components/schemas/PaymentID'
-          description: ID of the payment.
-        amount:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_authorized
+        error:
+          type: string
+          example: invalid secret key
+    DisputeOrderItem:
+      type: object
+      properties:
+        reference_id:
+          type: string
+          example: payment id
+          description: Reference id from payment.
+        title:
+          type: string
+          example: Order item title
+          description: Order item title.
+        unit_price:
           type: string
           example: '100.00'
-          description: Total disputed amount.
-        currency:
-          $ref: '#/components/schemas/Currency'
-          description: The currency of the dispute. It's always equal to the currency of the payment.
-        created_at:
-          $ref: '#/components/schemas/DisputeCreatedAt'
-        expired_at:
-          $ref: '#/components/schemas/DisputeExpiredAt'
-        status:
-          $ref: '#/components/schemas/DisputeStatus'
-        reason:
-          $ref: '#/components/schemas/DisputeReason'
-        days_left:
-          $ref: '#/components/schemas/DisputeDaysLeft'
-        history:
-          type: array
-          items:
-            $ref: '#/components/schemas/DisputeHistoryItem'
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DisputeOrderItem'
-        order_number:
-          type: string
-          example: '#1234'
-          description: Merchant-assigned order number.
-        comment:
-          $ref: '#/components/schemas/DisputeComment'
+          description: Order item unit price.
       required:
-      - id
-      - attachments
-      - payment_id
-      - amount
-      - currency
-      - created_at
-      - expired_at
-      - status
-      - reason
-      - days_left
-      - history
-      - items
-      - order_number
-      - comment
-    DisputeID:
-      type: string
-      format: uuid
-      example: dispute id, uuid format
-      readOnly: true
-      description: ID of the dispute.
-    DisputeExpiredAt:
-      type: string
-      readOnly: true
-      example: 2018-10-17 00:00:00+00:00
-      description: Date and time of the expiration of the Dispute, in UTC, and displayed in ISO 8601 datetime format.
-    Error_500:
-      type: string
-      example: Internal Server error
+      - reference_id
+      - title
+      - unit_price
     Evidence:
       type: object
       properties:
@@ -620,15 +638,39 @@ components:
       - content
       - created_by
       - created_at
-    DisputeDaysLeft:
-      type: integer
-      format: uint16
-      description: How many days left before dispute will be automatically approved.
-    DisputeCreatedAt:
+    Error_500:
+      type: string
+      example: Internal Server error
+    Currency:
+      type: string
+      enum:
+      - AED
+      - SAR
+      - KWD
+      example: AED
+      description: "ISO 4217 currency code for the payment amount. Currently there are 3 possible currency options - depending on the country where the store is located:\n  - `AED` - United Arab Emirates Dirham\n  - `SAR` - Saudi Riyal\n  - `KWD` - Kuwaiti Dinar\n"
+    Error_404_dispute_not_found:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorType:
+          type: string
+          example: not_found
+        error:
+          type: string
+          example: dispute not found
+    DisputeReason:
       type: string
       readOnly: true
-      example: 2018-10-17 00:00:00+00:00
-      description: Date and time the Dispute was created, in UTC, and displayed in ISO 8601 datetime format.
+      enum:
+      - unreceived_refund
+      - identity_theft
+      - product_issue
+      - not_delivered
+      example: unreceived_refund
+      description: "Cause of the dispute was created (selected by customer). There are only four reasons:\n  - `unreceived_refund` - a refund not received\n  - `identity_theft` - I did not place this order (also known as identity theft)\n  - `product_issue` - there was a problem with the product\n  - `not_delivered` - the order was not delivered\n"
     DisputeNoHistory:
       type: object
       properties:
@@ -680,48 +722,6 @@ components:
       - items
       - order_number
       - comment
-    DisputeComment:
-      type: string
-      example: additional comments
-      description: The customer additional comments on the causes of the dispute.
-    Error_404_dispute_not_found:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        errorType:
-          type: string
-          example: not_found
-        error:
-          type: string
-          example: dispute not found
-    Currency:
-      type: string
-      enum:
-      - AED
-      - SAR
-      - KWD
-      example: AED
-      description: "ISO 4217 currency code for the payment amount. Currently there are 3 possible currency options - depending on the country where the store is located:\n  - `AED` - United Arab Emirates Dirham\n  - `SAR` - Saudi Riyal\n  - `KWD` - Kuwaiti Dinar\n"
-    Error_400_bad_request:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        errorType:
-          type: string
-          example: bad_data
-        error:
-          type: string
-          example: bad_request
-    PaymentID:
-      type: string
-      format: uuid
-      example: payment id, uuid format
-      readOnly: true
-      description: Unique identifier for the payment (UUID), assigned by Tabby. Save it on your side!
   parameters:
     disputeIdParam:
       in: path
