@@ -131,3 +131,36 @@ plans:
       - name: Equal monthly installments
       - name: Transparent disclosure at checkout
       - name: Pay early without penalty
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - metered
+  - subscription
+  units:
+  - transaction
+  plans:
+  - name: Merchant (Custom Contract)
+    access: other
+    model: metered
+    model_how: stated
+    units:
+    - transaction
+    periods:
+    - per-use
+  - name: Buyer — Pay in 4
+    access: free
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - per-use
+  - name: Buyer — Pay Monthly
+    access: other
+    model: metered
+    model_how: stated
+    units:
+    - other
+    periods:
+    - month
