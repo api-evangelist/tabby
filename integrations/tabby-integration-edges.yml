@@ -1,0 +1,120 @@
+generated: '2026-10-12'
+method: searched
+source:
+- https://zapier.com/apps/tabby/integrations
+- https://n8n.io/integrations/tabby/
+- https://composio.dev/toolkits/tabby
+- https://monid.ai/tools/tabby
+checked:
+- https://composio.dev/toolkits/tabby
+- https://docs.tabby.ai/llms.txt
+- https://monid.ai/tools/tabby
+- https://n8n.io/integrations/tabby/
+- https://zapier.com/apps/tabby/integrations
+summary: Ten e-commerce platform plugins documented in Tabby docs (e-commerce-platforms section); no Zapier/Make/n8n
+  marketplace app.
+marketplace_apps: []
+edges:
+- partner_name: Shopify
+  partner: shopify
+  partner_match: domain
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/shopify/shopify-plugin-installation
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Shopify stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: WooCommerce
+  partner: woocommerce
+  partner_match: domain
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/woocommerce/woocommerce-plugin-installation
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on WooCommerce stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: Magento 2 (Adobe Commerce)
+  partner: magento
+  partner_match: name-exact
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/magento-2/magento-2-plugin-installation
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Magento 2 (Adobe Commerce) stores via a Tabby-maintained
+    plugin/app
+  operations: []
+- partner_name: OpenCart
+  partner: opencart
+  partner_match: domain
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/opencart/opencart-plugin-installation
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on OpenCart stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: Odoo
+  partner: odoo
+  partner_match: domain
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/odoo/odoo-plugin-installation
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Odoo stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: Salesforce Commerce Cloud
+  partner: salesforce-commerce-cloud
+  partner_match: name-exact
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/salesforce
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Salesforce Commerce Cloud stores via a Tabby-maintained
+    plugin/app
+  operations: []
+- partner_name: Salla
+  partner: salla
+  partner_match: name-exact
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/salla
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Salla stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: Zid
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/zid
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Zid stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: Matjrah
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/matjrah
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on Matjrah stores via a Tabby-maintained plugin/app
+  operations: []
+- partner_name: ExpandCart
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://docs.tabby.ai/e-commerce-platforms/expandcart
+  direction: provider-built
+  category: e-commerce-platform
+  relationship: payment-method
+  use_case: Tabby BNPL offered as a checkout payment method on ExpandCart stores via a Tabby-maintained plugin/app
+  operations: []
+templates: []

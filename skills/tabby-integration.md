@@ -1,5 +1,5 @@
 ---
-name: Tabby
+name: tabby-integration
 description: Use when integrating Buy Now Pay Later (BNPL) payment solutions into e-commerce platforms, custom websites, or mobile apps. Reach for this skill when building checkout flows, handling payment processing, managing webhooks, testing integrations, or troubleshooting payment status issues in MENA region (KSA, UAE, Kuwait).
 metadata:
     mintlify-proj: tabby
